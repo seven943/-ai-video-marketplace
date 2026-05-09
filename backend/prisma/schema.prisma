@@ -26,6 +26,9 @@ model User {
   reviewsGiven   Review[]         @relation("Reviewer")
   reviewsReceived Review[]        @relation("Target")
   notifications  Notification[]
+  buyerConversations   Conversation[] @relation("BuyerConv")
+  creatorConversations Conversation[] @relation("CreatorConv")
+  sentMessages         Message[]
 
   @@index([phone])
 }
@@ -120,6 +123,7 @@ model Order {
   creator  User?  @relation("CreatorOrders", fields: [creatorId], references: [id])
   payment  Payment?
   reviews  Review[]
+  conversation Conversation?
 
   @@index([buyerId])
   @@index([creatorId])
@@ -202,4 +206,42 @@ model Notification {
 
   @@index([userId, read])
   @@index([createdAt])
+}
+
+// ==================== 会话 ====================
+
+model Conversation {
+  id        String   @id @default(cuid())
+  orderId   String   @unique
+  buyerId   String
+  creatorId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order    Order     @relation(fields: [orderId], references: [id])
+  buyer    User      @relation("BuyerConv", fields: [buyerId], references: [id])
+  creator  User      @relation("CreatorConv", fields: [creatorId], references: [id])
+  messages Message[]
+
+  @@index([buyerId])
+  @@index([creatorId])
+}
+
+// ==================== 消息 ====================
+
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  senderId       String
+  content        String
+  type           String   @default("TEXT")
+  blocked        Boolean  @default(false)
+  read           Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  sender       User         @relation(fields: [senderId], references: [id])
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
 }

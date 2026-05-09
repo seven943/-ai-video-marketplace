@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationService } from '../notification/notification.service';
+import { ChatService } from '../chat/chat.service';
 import { OrderStatus, VideoCategory } from '@prisma/client';
 
 @Injectable()
@@ -8,6 +9,7 @@ export class OrderService {
   constructor(
     private prisma: PrismaService,
     private notification: NotificationService,
+    private chatService: ChatService,
   ) {}
 
   async list(params: { status?: string; page?: number; pageSize?: number }) {
@@ -80,6 +82,9 @@ export class OrderService {
       where: { id: orderId },
       data: { creatorId, status: 'MATCHED' },
     });
+
+    // 自动创建聊天会话
+    await this.chatService.createConversation(orderId, order.buyerId, creatorId);
 
     await this.notification.create({
       userId: order.buyerId,

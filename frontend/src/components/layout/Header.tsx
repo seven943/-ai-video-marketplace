@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Menu, X, Video, User, LogOut, ShieldCheck } from 'lucide-react';
+import { Menu, X, Video, User, LogOut, ShieldCheck, MessageSquare } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
 import { NotificationBell } from '@/components/ui/NotificationBell';
 
@@ -39,13 +39,22 @@ export function Header() {
             </Link>
           ))}
           {isAdmin && (
-            <Link
-              href="/admin/review"
-              className="flex items-center gap-1 text-sm font-medium text-primary-600 transition-colors hover:text-primary-700"
-            >
-              <ShieldCheck className="h-4 w-4" />
-              审核中心
-            </Link>
+            <>
+              <Link
+                href="/admin/review"
+                className="flex items-center gap-1 text-sm font-medium text-primary-600 transition-colors hover:text-primary-700"
+              >
+                <ShieldCheck className="h-4 w-4" />
+                审核中心
+              </Link>
+              <Link
+                href="/admin/chat"
+                className="flex items-center gap-1 text-sm font-medium text-primary-600 transition-colors hover:text-primary-700"
+              >
+                <MessageSquare className="h-4 w-4" />
+                聊天监控
+              </Link>
+            </>
           )}
         </nav>
 
@@ -53,6 +62,9 @@ export function Header() {
         <div className="hidden items-center gap-3 md:flex">
           {isAuthenticated() ? (
             <div className="flex items-center gap-3">
+              <Link href="/chat" className="p-1.5 text-gray-500 hover:text-primary-600 transition-colors">
+                <MessageSquare className="h-5 w-5" />
+              </Link>
               <NotificationBell />
               <Link
                 href="/profile"

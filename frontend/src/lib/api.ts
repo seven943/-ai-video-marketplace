@@ -134,3 +134,21 @@ export const notificationApi = {
   markAllAsRead: () =>
     api.post('/notifications/read-all'),
 };
+
+// ========== 聊天 ==========
+export const chatApi = {
+  conversations: () =>
+    api.get('/chat/conversations'),
+  messages: (convId: string, params?: { page?: number }) =>
+    api.get(`/chat/conversations/${convId}/messages`, { params }),
+  sendMessage: (convId: string, content: string, type?: string) =>
+    api.post(`/chat/conversations/${convId}/messages`, { content, type }),
+  unreadCount: () =>
+    api.get('/chat/unread-count'),
+  adminConversations: (params?: { page?: number; pageSize?: number }) =>
+    api.get('/chat/admin/conversations', { params }),
+  adminMessages: (params?: { page?: number; pageSize?: number }) =>
+    api.get('/chat/admin/messages', { params }),
+  adminBlocked: (params?: { page?: number; pageSize?: number }) =>
+    api.get('/chat/admin/blocked', { params }),
+};
