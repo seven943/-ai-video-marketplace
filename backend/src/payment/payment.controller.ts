@@ -21,6 +21,25 @@ export class PaymentController {
     return this.paymentService.create(body.orderId, body.method, userId);
   }
 
+  @Post(':id/simulate-pay')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '模拟支付成功' })
+  async simulatePay(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.paymentService.simulatePay(id, userId);
+  }
+
+  @Get('order/:orderId')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '根据订单获取支付记录' })
+  async getByOrder(@Param('orderId') orderId: string) {
+    return this.paymentService.getByOrder(orderId);
+  }
+
   @Post(':orderId/release')
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()

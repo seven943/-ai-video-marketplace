@@ -10,34 +10,52 @@ export class PaymentService {
     const order = await this.prisma.order.findUnique({ where: { id: orderId } });
     if (!order) throw new NotFoundException('订单不存在');
     if (order.buyerId !== userId) throw new BadRequestException('无权操作');
-    if (order.status !== 'MATCHED') throw new BadRequestException('订单状态不正确');
+    if (order.status !== 'MATCHED') throw new BadRequestException('订单状态不正确，需等待创作者接单后才能支付');
 
     // 检查是否已有支付记录
     const existing = await this.prisma.payment.findUnique({ where: { orderId } });
-    if (existing && existing.status === 'PAID') {
-      throw new BadRequestException('已支付');
+    if (existing && existing.status !== 'PENDING') {
+      throw new BadRequestException('该订单已有支付记录');
     }
 
-    const amount = order.budgetMax; // MVP 阶段按最高预算
+    // 金额取预算中间值
+    const amount = Math.round((order.budgetMin + order.budgetMax) / 2);
 
-    // 创建支付记录（MVP 阶段模拟支付成功）
     const payment = await this.prisma.payment.upsert({
       where: { orderId },
-      create: { orderId, amount, method, status: 'PAID' },
-      update: { amount, method, status: 'PAID' },
+      create: { orderId, amount, method, status: 'PENDING' },
+      update: { amount, method, status: 'PENDING' },
     });
 
-    // 更新订单状态
+    return payment;
+  }
+
+  async simulatePay(paymentId: string, userId: string) {
+    const payment = await this.prisma.payment.findUnique({
+      where: { id: paymentId },
+      include: { order: true },
+    });
+    if (!payment) throw new NotFoundException('支付记录不存在');
+    if (payment.order.buyerId !== userId) throw new BadRequestException('无权操作');
+    if (payment.status !== 'PENDING') throw new BadRequestException('支付状态不正确');
+
+    // 模拟支付成功
+    const updated = await this.prisma.payment.update({
+      where: { id: paymentId },
+      data: { status: 'PAID' },
+    });
+
+    // 更新订单状态为 IN_PROGRESS
     await this.prisma.order.update({
-      where: { id: orderId },
+      where: { id: payment.orderId },
       data: { status: 'IN_PROGRESS' },
     });
 
-    return {
-      ...payment,
-      // TODO: 返回真实的支付链接
-      payUrl: method === 'WECHAT' ? 'weixin://...' : 'alipay://...',
-    };
+    return updated;
+  }
+
+  async getByOrder(orderId: string) {
+    return this.prisma.payment.findUnique({ where: { orderId } });
   }
 
   async release(orderId: string) {

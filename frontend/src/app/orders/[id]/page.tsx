@@ -3,13 +3,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, Calendar, DollarSign, User, Clock, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, Calendar, DollarSign, User, Clock, CheckCircle2, XCircle, AlertCircle, CreditCard } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { orderApi } from '@/lib/api';
+import { orderApi, payApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { VIDEO_CATEGORY_LABELS, ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, type Order, type Review } from '@/types';
 import { ReviewForm } from '@/components/ui/ReviewForm';
 import { ReviewList } from '@/components/ui/ReviewList';
+import { PaymentModal } from '@/components/payment/PaymentModal';
 import { cn } from '@/lib/utils';
 
 const statusTimeline: { status: string; label: string; icon: typeof CheckCircle2 }[] = [
@@ -26,9 +27,10 @@ export default function OrderDetailPage() {
   const params = useParams();
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
-  const [order, setOrder] = useState<Order & { reviews?: Review[] } | null>(null);
+  const [order, setOrder] = useState<Order & { reviews?: Review[]; payment?: any } | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState('');
+  const [showPayment, setShowPayment] = useState(false);
 
   const fetchOrder = useCallback(async () => {
     try {
@@ -184,8 +186,20 @@ export default function OrderDetailPage() {
                   </button>
                 )}
 
-                {/* 开始制作（已接单的创作者） */}
-                {isAssignedCreator && order.status === 'MATCHED' && (
+                {/* 去支付（买家，订单已匹配且未支付） */}
+                {isBuyer && order.status === 'MATCHED' && (!order.payment || order.payment.status === 'PENDING') && (
+                  <button
+                    onClick={() => setShowPayment(true)}
+                    disabled={!!actionLoading}
+                    className="btn-primary flex items-center gap-2"
+                  >
+                    <CreditCard className="h-4 w-4" />
+                    {order.payment ? '继续支付' : '去支付'}
+                  </button>
+                )}
+
+                {/* 开始制作（已接单的创作者，且买家已支付） */}
+                {isAssignedCreator && order.status === 'MATCHED' && order.payment?.status === 'PAID' && (
                   <button
                     onClick={() => handleAction('start', () => orderApi.start(order.id))}
                     disabled={!!actionLoading}
@@ -281,22 +295,28 @@ export default function OrderDetailPage() {
           )}
 
           {/* 支付信息 */}
-          {(order as any).payment && (
+          {order.payment && (
             <div className="card p-5">
               <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">支付信息</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-500">金额</span>
-                  <span className="font-medium text-gray-900">¥{(order as any).payment.amount}</span>
+                  <span className="font-medium text-gray-900">¥{order.payment.amount}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">方式</span>
+                  <span className="font-medium text-gray-900">
+                    {order.payment.method === 'WECHAT' ? '微信支付' : '支付宝'}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">状态</span>
                   <span className={cn('font-medium',
-                    (order as any).payment.status === 'RELEASED' ? 'text-green-600' :
-                    (order as any).payment.status === 'PAID' ? 'text-blue-600' :
-                    (order as any).payment.status === 'REFUNDED' ? 'text-red-600' : 'text-gray-600'
+                    order.payment.status === 'RELEASED' ? 'text-green-600' :
+                    order.payment.status === 'PAID' ? 'text-blue-600' :
+                    order.payment.status === 'REFUNDED' ? 'text-red-600' : 'text-orange-600'
                   )}>
-                    {({ 'PENDING': '待支付', 'PAID': '已支付', 'RELEASED': '已释放', 'REFUNDED': '已退款' } as Record<string, string>)[(order as any).payment.status] || (order as any).payment.status}
+                    {({ 'PENDING': '待支付', 'PAID': '已支付（托管中）', 'RELEASED': '已结算', 'REFUNDED': '已退款' } as Record<string, string>)[order.payment.status] || order.payment.status}
                   </span>
                 </div>
               </div>
@@ -304,6 +324,16 @@ export default function OrderDetailPage() {
           )}
         </div>
       </div>
+
+      {/* 支付弹窗 */}
+      {showPayment && (
+        <PaymentModal
+          orderId={order.id}
+          amount={Math.round((order.budgetMin + order.budgetMax) / 2)}
+          onClose={() => setShowPayment(false)}
+          onSuccess={fetchOrder}
+        />
+      )}
     </div>
   );
 }

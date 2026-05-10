@@ -103,8 +103,12 @@ export const creatorApi = {
 
 // ========== 支付 ==========
 export const payApi = {
-  create: (orderId: string, method: 'wechat' | 'alipay') =>
+  create: (orderId: string, method: 'WECHAT' | 'ALIPAY') =>
     api.post('/payment/create', { orderId, method }),
+  simulatePay: (paymentId: string) =>
+    api.post(`/payment/${paymentId}/simulate-pay`),
+  getByOrder: (orderId: string) =>
+    api.get(`/payment/order/${orderId}`),
   status: (paymentId: string) =>
     api.get(`/payment/${paymentId}/status`),
 };
