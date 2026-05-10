@@ -9,11 +9,12 @@ import { cn } from '@/lib/utils';
 interface PaymentModalProps {
   orderId: string;
   amount: number;
+  isDeposit?: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export function PaymentModal({ orderId, amount, onClose, onSuccess }: PaymentModalProps) {
+export function PaymentModal({ orderId, amount, isDeposit, onClose, onSuccess }: PaymentModalProps) {
   const [method, setMethod] = useState<'WECHAT' | 'ALIPAY'>('WECHAT');
   const [step, setStep] = useState<'select' | 'paying' | 'success'>('select');
   const [loading, setLoading] = useState(false);
@@ -57,15 +58,16 @@ export function PaymentModal({ orderId, amount, onClose, onSuccess }: PaymentMod
 
         {step === 'select' && (
           <>
-            <h2 className="text-xl font-bold text-gray-900">确认支付</h2>
-            <p className="mt-1 text-sm text-gray-500">选择支付方式完成订单支付</p>
+            <h2 className="text-xl font-bold text-gray-900">{isDeposit ? '支付定金' : '确认支付'}</h2>
+            <p className="mt-1 text-sm text-gray-500">{isDeposit ? '支付报价10%的定金，资金将托管至订单完成' : '选择支付方式完成订单支付'}</p>
 
             {/* 金额 */}
             <div className="mt-6 rounded-xl bg-primary-50 p-4 text-center">
-              <p className="text-sm text-gray-500">支付金额</p>
+              <p className="text-sm text-gray-500">{isDeposit ? '定金金额' : '支付金额'}</p>
               <p className="mt-1 text-3xl font-bold text-primary-600">
                 ¥{amount.toLocaleString()}
               </p>
+              {isDeposit && <p className="mt-1 text-xs text-gray-400">报价的10%，剩余90%验收后结算</p>}
             </div>
 
             {/* 支付方式 */}
@@ -135,7 +137,7 @@ export function PaymentModal({ orderId, amount, onClose, onSuccess }: PaymentMod
             <CheckCircle className="h-16 w-16 text-green-500" />
             <h2 className="mt-4 text-xl font-bold text-gray-900">支付成功</h2>
             <p className="mt-2 text-sm text-gray-500">
-              ¥{amount.toLocaleString()} 已支付，资金将托管至订单完成
+              ¥{amount.toLocaleString()} 已支付{isDeposit ? '（定金）' : ''}，资金将托管至订单完成
             </p>
           </div>
         )}

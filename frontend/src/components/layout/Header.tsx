@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Menu, X, Video, User, LogOut, ShieldCheck, MessageSquare } from 'lucide-react';
+import { Menu, X, Video, User, LogOut, ShieldCheck, MessageSquare, BarChart3 } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
 import { NotificationBell } from '@/components/ui/NotificationBell';
 
@@ -55,6 +55,15 @@ export function Header() {
                 聊天监控
               </Link>
             </>
+          )}
+          {isAuthenticated() && (user?.role === 'CREATOR' || user?.role === 'BOTH' || isAdmin) && (
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-1 text-sm font-medium text-gray-600 transition-colors hover:text-primary-600"
+            >
+              <BarChart3 className="h-4 w-4" />
+              数据看板
+            </Link>
           )}
         </nav>
 

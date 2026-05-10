@@ -50,6 +50,17 @@ export class ChatController {
     return { count };
   }
 
+  @Post('conversations/direct')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '直接联系创作者' })
+  async getOrCreateDirect(
+    @CurrentUser('id') userId: string,
+    @Body() body: { creatorId: string },
+  ) {
+    return this.chatService.getOrCreateDirect(userId, body.creatorId);
+  }
+
   // 管理员接口
   @Get('admin/conversations')
   @UseGuards(AuthGuard('jwt'))

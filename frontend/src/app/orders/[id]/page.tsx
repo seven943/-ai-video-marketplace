@@ -3,19 +3,22 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, Calendar, DollarSign, User, Clock, CheckCircle2, XCircle, AlertCircle, CreditCard } from 'lucide-react';
+import { ArrowLeft, Loader2, Calendar, DollarSign, User, Clock, CheckCircle2, XCircle, AlertCircle, CreditCard, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { orderApi, payApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { VIDEO_CATEGORY_LABELS, ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, type Order, type Review } from '@/types';
 import { ReviewForm } from '@/components/ui/ReviewForm';
 import { ReviewList } from '@/components/ui/ReviewList';
+import { RecommendedCreators } from '@/components/ui/RecommendedCreators';
 import { PaymentModal } from '@/components/payment/PaymentModal';
 import { cn } from '@/lib/utils';
 
 const statusTimeline: { status: string; label: string; icon: typeof CheckCircle2 }[] = [
   { status: 'PENDING', label: '待匹配', icon: Clock },
   { status: 'MATCHED', label: '已匹配', icon: User },
+  { status: 'QUOTING', label: '待确认报价', icon: DollarSign },
+  { status: 'QUOTE_ACCEPTED', label: '报价已接受', icon: CheckCircle2 },
   { status: 'IN_PROGRESS', label: '制作中', icon: AlertCircle },
   { status: 'REVIEWING', label: '审核中', icon: AlertCircle },
   { status: 'COMPLETED', label: '已完成', icon: CheckCircle2 },
@@ -31,6 +34,9 @@ export default function OrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState('');
   const [showPayment, setShowPayment] = useState(false);
+  const [showQuoteForm, setShowQuoteForm] = useState(false);
+  const [quotedPrice, setQuotedPrice] = useState('');
+  const [quotedDeadline, setQuotedDeadline] = useState('');
 
   const fetchOrder = useCallback(async () => {
     try {
@@ -82,6 +88,8 @@ export default function OrderDetailPage() {
   const isAssignedCreator = user?.id === order.creatorId;
   const isTerminal = terminalStatuses.includes(order.status);
   const isREVISION = order.status === 'REVISION';
+  const isQUOTING = order.status === 'QUOTING';
+  const isQUOTE_ACCEPTED = order.status === 'QUOTE_ACCEPTED';
 
   // 当前状态在时间线中的位置
   const currentStep = statusTimeline.findIndex((s) => s.status === order.status);
@@ -151,9 +159,6 @@ export default function OrderDetailPage() {
                       <span className={cn('mt-1.5 text-xs', isActive ? 'font-medium text-primary-600' : 'text-gray-400')}>
                         {step.label}
                       </span>
-                      {idx < statusTimeline.length - 1 && (
-                        <div className={cn('absolute h-0.5 w-full', isDone ? 'bg-primary-500' : 'bg-gray-200')} />
-                      )}
                     </div>
                   );
                 })}
@@ -186,8 +191,53 @@ export default function OrderDetailPage() {
                   </button>
                 )}
 
-                {/* 去支付（买家，订单已匹配且未支付） */}
-                {isBuyer && order.status === 'MATCHED' && (!order.payment || order.payment.status === 'PENDING') && (
+                {/* 创作者报价（已匹配，创作者角色） */}
+                {isAssignedCreator && order.status === 'MATCHED' && (
+                  <button
+                    onClick={() => setShowQuoteForm(true)}
+                    disabled={!!actionLoading}
+                    className="btn-primary flex items-center gap-2"
+                  >
+                    <DollarSign className="h-4 w-4" />
+                    报价
+                  </button>
+                )}
+
+                {/* 买家接受/拒绝报价 */}
+                {isBuyer && isQUOTING && (
+                  <>
+                    <button
+                      onClick={() => handleAction('acceptQuote', () => orderApi.acceptQuote(order.id))}
+                      disabled={!!actionLoading}
+                      className="btn-primary flex items-center gap-2"
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                      {actionLoading === 'acceptQuote' ? <Loader2 className="h-4 w-4 animate-spin" /> : '接受报价'}
+                    </button>
+                    <button
+                      onClick={() => handleAction('rejectQuote', () => orderApi.rejectQuote(order.id))}
+                      disabled={!!actionLoading}
+                      className="btn-secondary text-red-600 hover:text-red-700"
+                    >
+                      {actionLoading === 'rejectQuote' ? <Loader2 className="h-4 w-4 animate-spin" /> : '拒绝报价'}
+                    </button>
+                  </>
+                )}
+
+                {/* 去支付定金（买家，报价已接受且未支付） */}
+                {isBuyer && isQUOTE_ACCEPTED && (!order.payment || order.payment.status === 'PENDING') && (
+                  <button
+                    onClick={() => setShowPayment(true)}
+                    disabled={!!actionLoading}
+                    className="btn-primary flex items-center gap-2"
+                  >
+                    <CreditCard className="h-4 w-4" />
+                    {order.payment ? '继续支付定金' : '支付10%定金'}
+                  </button>
+                )}
+
+                {/* 旧流程：去支付（买家，订单已匹配且无报价） */}
+                {isBuyer && order.status === 'MATCHED' && !order.quotedPrice && (!order.payment || order.payment.status === 'PENDING') && (
                   <button
                     onClick={() => setShowPayment(true)}
                     disabled={!!actionLoading}
@@ -199,7 +249,7 @@ export default function OrderDetailPage() {
                 )}
 
                 {/* 开始制作（已接单的创作者，且买家已支付） */}
-                {isAssignedCreator && order.status === 'MATCHED' && order.payment?.status === 'PAID' && (
+                {isAssignedCreator && ['MATCHED', 'QUOTE_ACCEPTED'].includes(order.status) && order.payment?.status === 'PAID' && (
                   <button
                     onClick={() => handleAction('start', () => orderApi.start(order.id))}
                     disabled={!!actionLoading}
@@ -250,6 +300,93 @@ export default function OrderDetailPage() {
             </div>
           )}
 
+          {/* 报价信息卡片 */}
+          {order.quotedPrice && (
+            <div className="card p-6 border-primary-200 bg-primary-50/30">
+              <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-primary-500" />
+                创作者报价
+              </h2>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-gray-500">报价金额</p>
+                  <p className="text-lg font-bold text-primary-600">¥{order.quotedPrice.toLocaleString()}</p>
+                </div>
+                {order.quotedDeadline && (
+                  <div>
+                    <p className="text-xs text-gray-500">预计交付</p>
+                    <p className="text-lg font-bold text-gray-900">{new Date(order.quotedDeadline).toLocaleDateString('zh-CN')}</p>
+                  </div>
+                )}
+                {isQUOTE_ACCEPTED && (
+                  <div className="col-span-2">
+                    <p className="text-xs text-gray-500">定金金额（10%）</p>
+                    <p className="text-lg font-bold text-accent-600">¥{Math.round(order.quotedPrice * 0.1).toLocaleString()}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* 创作者报价表单 */}
+          {showQuoteForm && isAssignedCreator && order.status === 'MATCHED' && (
+            <div className="card p-6 border-primary-200">
+              <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Send className="h-4 w-4 text-primary-500" />
+                提交报价
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">报价金额（元）</label>
+                  <input
+                    type="number"
+                    value={quotedPrice}
+                    onChange={(e) => setQuotedPrice(e.target.value)}
+                    placeholder={`参考预算：¥${order.budgetMin} - ¥${order.budgetMax}`}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">预计交付日期</label>
+                  <input
+                    type="date"
+                    value={quotedDeadline}
+                    onChange={(e) => setQuotedDeadline(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={async () => {
+                      if (!quotedPrice || !quotedDeadline) {
+                        toast.error('请填写报价金额和交付日期');
+                        return;
+                      }
+                      await handleAction('submitQuote', () =>
+                        orderApi.submitQuote(order.id, {
+                          quotedPrice: Number(quotedPrice),
+                          quotedDeadline,
+                        })
+                      );
+                      setShowQuoteForm(false);
+                    }}
+                    disabled={!!actionLoading}
+                    className="btn-primary flex items-center gap-2"
+                  >
+                    {actionLoading === 'submitQuote' ? <Loader2 className="h-4 w-4 animate-spin" /> : '提交报价'}
+                  </button>
+                  <button
+                    onClick={() => setShowQuoteForm(false)}
+                    className="btn-secondary"
+                  >
+                    取消
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* 评价区域 */}
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-gray-900">评价</h2>
@@ -294,15 +431,26 @@ export default function OrderDetailPage() {
             </div>
           )}
 
+          {/* 推荐创作者（订单待匹配时显示） */}
+          {order.status === 'PENDING' && !order.creatorId && (
+            <RecommendedCreators orderId={order.id} compact />
+          )}
+
           {/* 支付信息 */}
           {order.payment && (
             <div className="card p-5">
               <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">支付信息</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-500">金额</span>
+                  <span className="text-gray-500">{order.quotedPrice ? '定金' : '金额'}</span>
                   <span className="font-medium text-gray-900">¥{order.payment.amount}</span>
                 </div>
+                {order.quotedPrice && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">报价总额</span>
+                    <span className="font-medium text-gray-900">¥{order.quotedPrice.toLocaleString()}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-gray-500">方式</span>
                   <span className="font-medium text-gray-900">
@@ -329,7 +477,8 @@ export default function OrderDetailPage() {
       {showPayment && (
         <PaymentModal
           orderId={order.id}
-          amount={Math.round((order.budgetMin + order.budgetMax) / 2)}
+          amount={order.quotedPrice ? Math.round(order.quotedPrice * 0.1) : Math.round((order.budgetMin + order.budgetMax) / 2)}
+          isDeposit={!!order.quotedPrice}
           onClose={() => setShowPayment(false)}
           onSuccess={fetchOrder}
         />

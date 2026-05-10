@@ -6,8 +6,27 @@ import { HydrateAuth } from '@/components/providers/HydrateAuth';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
-  title: 'AI视频工场 - 连接AI视频创作者与需求方',
-  description: '一站式AI视频供需交易平台，让AI视频创作更简单',
+  title: {
+    default: 'AI视频工场 - 连接AI视频创作者与需求方',
+    template: '%s | AI视频工场',
+  },
+  description: '一站式AI视频供需交易平台，让AI视频创作更简单。专业AI视频创作者为您制作商品展示、品牌宣传、短视频等内容。',
+  keywords: ['AI视频', '视频制作', '视频创作', '商品展示视频', '品牌宣传', '短视频制作', 'AI视频工场'],
+  metadataBase: new URL('https://aivideo.com'),
+  openGraph: {
+    type: 'website',
+    locale: 'zh_CN',
+    siteName: 'AI视频工场',
+    title: 'AI视频工场 - 连接AI视频创作者与需求方',
+    description: '一站式AI视频供需交易平台，让AI视频创作更简单',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({

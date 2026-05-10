@@ -71,6 +71,12 @@ export const orderApi = {
     api.post('/orders', data),
   accept: (id: string) =>
     api.post(`/orders/${id}/accept`),
+  submitQuote: (id: string, data: { quotedPrice: number; quotedDeadline: string }) =>
+    api.post(`/orders/${id}/submit-quote`, data),
+  acceptQuote: (id: string) =>
+    api.post(`/orders/${id}/accept-quote`),
+  rejectQuote: (id: string) =>
+    api.post(`/orders/${id}/reject-quote`),
   start: (id: string) =>
     api.post(`/orders/${id}/start`),
   deliver: (id: string) =>
@@ -81,6 +87,8 @@ export const orderApi = {
     api.post(`/orders/${id}/request-revision`),
   cancel: (id: string) =>
     api.post(`/orders/${id}/cancel`),
+  recommendations: (id: string) =>
+    api.get(`/orders/${id}/recommendations`),
 };
 
 // ========== 评价 ==========
@@ -99,6 +107,10 @@ export const creatorApi = {
     api.get(`/creators/${id}`),
   register: (data: Record<string, unknown>) =>
     api.post('/creators/register', data),
+  updateProfile: (data: Record<string, unknown>) =>
+    api.patch('/creators/profile', data),
+  dashboard: () =>
+    api.get('/dashboard/creator'),
 };
 
 // ========== 支付 ==========
@@ -149,6 +161,8 @@ export const chatApi = {
     api.post(`/chat/conversations/${convId}/messages`, { content, type }),
   unreadCount: () =>
     api.get('/chat/unread-count'),
+  getOrCreateDirect: (creatorId: string) =>
+    api.post('/chat/conversations/direct', { creatorId }),
   adminConversations: (params?: { page?: number; pageSize?: number }) =>
     api.get('/chat/admin/conversations', { params }),
   adminMessages: (params?: { page?: number; pageSize?: number }) =>

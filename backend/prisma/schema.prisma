@@ -115,6 +115,8 @@ model Order {
   budgetMax    Int
   deadline     DateTime
   styleRefUrls String[]    @default([])
+  quotedPrice    Int?
+  quotedDeadline DateTime?
   status       OrderStatus @default(PENDING)
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
@@ -134,6 +136,8 @@ model Order {
 enum OrderStatus {
   PENDING
   MATCHED
+  QUOTING
+  QUOTE_ACCEPTED
   IN_PROGRESS
   REVIEWING
   REVISION

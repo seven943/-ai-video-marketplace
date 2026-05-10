@@ -90,7 +90,83 @@ export class OrderService {
       userId: order.buyerId,
       type: 'ORDER_STATUS',
       title: '订单已被接单',
-      content: `您的订单「${order.title}」已被创作者接单`,
+      content: `您的订单「${order.title}」已被创作者接单，请等待创作者报价`,
+      link: `/orders/${orderId}`,
+    });
+
+    return updated;
+  }
+
+  async submitQuote(orderId: string, creatorId: string, quotedPrice: number, quotedDeadline: string) {
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) throw new NotFoundException('订单不存在');
+    if (order.creatorId !== creatorId) throw new ForbiddenException('无权操作');
+    if (order.status !== 'MATCHED') throw new BadRequestException('订单状态不正确，需要在已匹配状态下报价');
+    if (quotedPrice <= 0) throw new BadRequestException('报价金额必须大于0');
+
+    const updated = await this.prisma.order.update({
+      where: { id: orderId },
+      data: {
+        quotedPrice,
+        quotedDeadline: new Date(quotedDeadline),
+        status: 'QUOTING',
+      },
+    });
+
+    await this.notification.create({
+      userId: order.buyerId,
+      type: 'ORDER_STATUS',
+      title: '创作者已报价',
+      content: `订单「${order.title}」创作者报价 ¥${quotedPrice}，请查看并确认`,
+      link: `/orders/${orderId}`,
+    });
+
+    return updated;
+  }
+
+  async acceptQuote(orderId: string, buyerId: string) {
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) throw new NotFoundException('订单不存在');
+    if (order.buyerId !== buyerId) throw new ForbiddenException('无权操作');
+    if (order.status !== 'QUOTING') throw new BadRequestException('订单状态不正确');
+    if (!order.quotedPrice) throw new BadRequestException('报价信息不完整');
+
+    const updated = await this.prisma.order.update({
+      where: { id: orderId },
+      data: { status: 'QUOTE_ACCEPTED' },
+    });
+
+    await this.notification.create({
+      userId: order.creatorId!,
+      type: 'ORDER_STATUS',
+      title: '买家已接受报价',
+      content: `订单「${order.title}」买家已接受报价 ¥${order.quotedPrice}，等待买家支付定金`,
+      link: `/orders/${orderId}`,
+    });
+
+    return updated;
+  }
+
+  async rejectQuote(orderId: string, buyerId: string) {
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) throw new NotFoundException('订单不存在');
+    if (order.buyerId !== buyerId) throw new ForbiddenException('无权操作');
+    if (order.status !== 'QUOTING') throw new BadRequestException('订单状态不正确');
+
+    const updated = await this.prisma.order.update({
+      where: { id: orderId },
+      data: {
+        quotedPrice: null,
+        quotedDeadline: null,
+        status: 'MATCHED',
+      },
+    });
+
+    await this.notification.create({
+      userId: order.creatorId!,
+      type: 'ORDER_STATUS',
+      title: '买家拒绝了报价',
+      content: `订单「${order.title}」买家拒绝了您的报价，请重新报价`,
       link: `/orders/${orderId}`,
     });
 
@@ -101,7 +177,9 @@ export class OrderService {
     const order = await this.prisma.order.findUnique({ where: { id: orderId } });
     if (!order) throw new NotFoundException('订单不存在');
     if (order.creatorId !== creatorId) throw new ForbiddenException('无权操作');
-    if (order.status !== 'MATCHED') throw new BadRequestException('订单状态不正确');
+    if (!['MATCHED', 'QUOTE_ACCEPTED'].includes(order.status)) {
+      throw new BadRequestException('订单状态不正确');
+    }
 
     return this.prisma.order.update({
       where: { id: orderId },
@@ -203,5 +281,96 @@ export class OrderService {
       where: { id: orderId },
       data: { status: 'CANCELLED' },
     });
+  }
+
+  async getRecommendations(orderId: string) {
+    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) throw new NotFoundException('订单不存在');
+
+    // 获取所有在线/忙碌的创作者
+    const creators = await this.prisma.creatorProfile.findMany({
+      where: {
+        user: { role: { in: ['CREATOR', 'BOTH'] } },
+        status: { in: ['ONLINE', 'BUSY'] },
+      },
+      include: {
+        user: { select: { id: true, nickname: true, avatar: true } },
+      },
+    });
+
+    // 提取订单关键词（从标题和描述中）
+    const orderText = `${order.title} ${order.description}`.toLowerCase();
+    const orderKeywords = orderText
+      .replace(/[^一-龥a-zA-Z0-9\s]/g, '')
+      .split(/\s+/)
+      .filter((w) => w.length >= 2);
+
+    // 查询每个创作者的作品分类统计
+    const creatorIds = creators.map((c) => c.userId);
+    const worksByCreator = await this.prisma.work.groupBy({
+      by: ['creatorId', 'category'],
+      where: { creatorId: { in: creatorIds } },
+      _count: true,
+    });
+
+    // 构建分类匹配映射
+    const categoryMap = new Map<string, number>();
+    worksByCreator.forEach((w) => {
+      const key = `${w.creatorId}:${w.category}`;
+      categoryMap.set(key, w._count);
+    });
+
+    // 计算每个创作者的推荐分数
+    const scored = creators.map((creator) => {
+      let score = 0;
+
+      // 1. 作品分类匹配（权重 30）
+      const categoryCount = categoryMap.get(`${creator.userId}:${order.category}`) || 0;
+      if (categoryCount > 0) score += 30 + Math.min(categoryCount * 2, 10);
+
+      // 2. 价格范围匹配（权重 25）
+      const priceOverlap =
+        creator.priceMin <= order.budgetMax && creator.priceMax >= order.budgetMin;
+      if (priceOverlap) {
+        score += 25;
+        // 价格越接近预算中间值，分数越高
+        const orderMid = (order.budgetMin + order.budgetMax) / 2;
+        const creatorMid = (creator.priceMin + creator.priceMax) / 2;
+        const priceDiff = Math.abs(orderMid - creatorMid) / orderMid;
+        score += Math.max(0, 10 * (1 - priceDiff));
+      }
+
+      // 3. 标签匹配（权重 20）
+      const tagOverlap = creator.tags.filter((tag) =>
+        orderKeywords.some((kw) => tag.toLowerCase().includes(kw)) ||
+        orderText.includes(tag.toLowerCase())
+      ).length;
+      score += Math.min(tagOverlap * 5, 20);
+
+      // 4. 评分（权重 15）
+      score += (creator.rating / 5) * 15;
+
+      // 5. 完成订单数（权重 10）
+      score += Math.min(creator.orderCount / 20, 1) * 10;
+
+      // 6. 在线状态加分
+      if (creator.status === 'ONLINE') score += 5;
+
+      return {
+        ...creator,
+        matchScore: Math.round(score * 10) / 10,
+        matchReasons: [
+          categoryCount > 0 ? `有${categoryCount}个同类作品` : null,
+          priceOverlap ? '价格匹配' : null,
+          tagOverlap > 0 ? `匹配${tagOverlap}个标签` : null,
+          creator.rating >= 4.5 ? '高评分' : null,
+        ].filter(Boolean),
+      };
+    });
+
+    // 按分数排序，返回前10个
+    return scored
+      .sort((a, b) => b.matchScore - a.matchScore)
+      .slice(0, 10);
   }
 }

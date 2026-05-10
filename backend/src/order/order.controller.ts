@@ -53,6 +53,40 @@ export class OrderController {
     return this.orderService.accept(id, creatorId);
   }
 
+  @Post(':id/submit-quote')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '创作者报价' })
+  async submitQuote(
+    @Param('id') id: string,
+    @CurrentUser('id') creatorId: string,
+    @Body() body: { quotedPrice: number; quotedDeadline: string },
+  ) {
+    return this.orderService.submitQuote(id, creatorId, body.quotedPrice, body.quotedDeadline);
+  }
+
+  @Post(':id/accept-quote')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '买家接受报价' })
+  async acceptQuote(
+    @Param('id') id: string,
+    @CurrentUser('id') buyerId: string,
+  ) {
+    return this.orderService.acceptQuote(id, buyerId);
+  }
+
+  @Post(':id/reject-quote')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '买家拒绝报价' })
+  async rejectQuote(
+    @Param('id') id: string,
+    @CurrentUser('id') buyerId: string,
+  ) {
+    return this.orderService.rejectQuote(id, buyerId);
+  }
+
   @Post(':id/deliver')
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
@@ -106,5 +140,11 @@ export class OrderController {
     @CurrentUser('id') userId: string,
   ) {
     return this.orderService.cancel(id, userId);
+  }
+
+  @Get(':id/recommendations')
+  @ApiOperation({ summary: '获取推荐创作者' })
+  async getRecommendations(@Param('id') id: string) {
+    return this.orderService.getRecommendations(id);
   }
 }

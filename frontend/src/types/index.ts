@@ -71,23 +71,29 @@ export interface Order {
   budgetMax: number;
   deadline: string;
   styleRefUrls: string[];
+  quotedPrice?: number;
+  quotedDeadline?: string;
   status: OrderStatus;
   createdAt: string;
   updatedAt: string;
 }
 
 export type OrderStatus =
-  | 'PENDING'      // 待匹配
-  | 'MATCHED'      // 已匹配
-  | 'IN_PROGRESS'  // 制作中
-  | 'REVIEWING'    // 审核中
-  | 'REVISION'     // 修改中
-  | 'COMPLETED'    // 已完成
-  | 'CANCELLED';   // 已取消
+  | 'PENDING'        // 待匹配
+  | 'MATCHED'        // 已匹配
+  | 'QUOTING'        // 待确认报价
+  | 'QUOTE_ACCEPTED' // 报价已接受
+  | 'IN_PROGRESS'    // 制作中
+  | 'REVIEWING'      // 审核中
+  | 'REVISION'       // 修改中
+  | 'COMPLETED'      // 已完成
+  | 'CANCELLED';     // 已取消
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   PENDING: '待匹配',
   MATCHED: '已匹配',
+  QUOTING: '待确认报价',
+  QUOTE_ACCEPTED: '报价已接受',
   IN_PROGRESS: '制作中',
   REVIEWING: '审核中',
   REVISION: '修改中',
@@ -98,6 +104,8 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
 export const ORDER_STATUS_COLORS: Record<OrderStatus, string> = {
   PENDING: 'bg-yellow-100 text-yellow-800',
   MATCHED: 'bg-blue-100 text-blue-800',
+  QUOTING: 'bg-cyan-100 text-cyan-800',
+  QUOTE_ACCEPTED: 'bg-teal-100 text-teal-800',
   IN_PROGRESS: 'bg-purple-100 text-purple-800',
   REVIEWING: 'bg-orange-100 text-orange-800',
   REVISION: 'bg-orange-100 text-orange-800',

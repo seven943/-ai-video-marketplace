@@ -10,7 +10,13 @@ export class PaymentService {
     const order = await this.prisma.order.findUnique({ where: { id: orderId } });
     if (!order) throw new NotFoundException('订单不存在');
     if (order.buyerId !== userId) throw new BadRequestException('无权操作');
-    if (order.status !== 'MATCHED') throw new BadRequestException('订单状态不正确，需等待创作者接单后才能支付');
+
+    // 支持两种流程：
+    // 1. 新流程：QUOTE_ACCEPTED → 支付10%定金
+    // 2. 旧流程：MATCHED → 支付全额
+    if (!['MATCHED', 'QUOTE_ACCEPTED'].includes(order.status)) {
+      throw new BadRequestException('订单状态不正确，需等待匹配后才能支付');
+    }
 
     // 检查是否已有支付记录
     const existing = await this.prisma.payment.findUnique({ where: { orderId } });
@@ -18,8 +24,15 @@ export class PaymentService {
       throw new BadRequestException('该订单已有支付记录');
     }
 
-    // 金额取预算中间值
-    const amount = Math.round((order.budgetMin + order.budgetMax) / 2);
+    // 计算金额：
+    // 有报价 → 报价的10%定金
+    // 无报价 → 预算中间值全额
+    let amount: number;
+    if (order.quotedPrice) {
+      amount = Math.round(order.quotedPrice * 0.1);
+    } else {
+      amount = Math.round((order.budgetMin + order.budgetMax) / 2);
+    }
 
     const payment = await this.prisma.payment.upsert({
       where: { orderId },

@@ -4,8 +4,8 @@
 
 @layer base {
   body {
-    @apply bg-purple-50/40 text-gray-900 antialiased;
-    background-image: radial-gradient(ellipse at top, rgba(243, 232, 255, 0.5), transparent 60%);
+    @apply bg-purple-50 text-gray-900 antialiased;
+    background-image: radial-gradient(ellipse at top, rgba(237, 233, 254, 0.8), transparent 60%);
     background-attachment: fixed;
   }
 

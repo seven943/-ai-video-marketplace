@@ -129,6 +129,50 @@ export class ChatService {
     });
   }
 
+  async getOrCreateDirect(buyerId: string, creatorId: string) {
+    if (buyerId === creatorId) {
+      throw new ForbiddenException('不能联系自己');
+    }
+
+    // 查找已有的会话
+    const existing = await this.prisma.conversation.findFirst({
+      where: {
+        buyerId,
+        creatorId,
+      },
+      include: {
+        order: { select: { id: true, title: true, status: true } },
+      },
+    });
+    if (existing) return existing;
+
+    // 创建草稿订单
+    const order = await this.prisma.order.create({
+      data: {
+        buyerId,
+        title: '咨询需求',
+        description: '买家通过创作者主页发起的咨询',
+        category: 'OTHER',
+        budgetMin: 0,
+        budgetMax: 0,
+        deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30天后
+        status: 'PENDING',
+      },
+    });
+
+    // 创建会话
+    return this.prisma.conversation.create({
+      data: {
+        orderId: order.id,
+        buyerId,
+        creatorId,
+      },
+      include: {
+        order: { select: { id: true, title: true, status: true } },
+      },
+    });
+  }
+
   // 管理员接口
   async adminGetAllMessages(page = 1, pageSize = 50) {
     const [items, total] = await Promise.all([

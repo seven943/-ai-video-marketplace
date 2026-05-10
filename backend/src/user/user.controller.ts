@@ -70,4 +70,23 @@ export class UserController {
   ) {
     return this.userService.registerCreator(userId, body);
   }
+
+  @Patch('creators/profile')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '更新创作者资料' })
+  async updateCreatorProfile(
+    @CurrentUser('id') userId: string,
+    @Body() body: { bio?: string; tags?: string[]; aiTools?: string[]; priceMin?: number; priceMax?: number; portfolioUrls?: string[]; status?: string },
+  ) {
+    return this.userService.updateCreatorProfile(userId, body);
+  }
+
+  @Get('dashboard/creator')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '创作者数据看板' })
+  async getCreatorDashboard(@CurrentUser('id') userId: string) {
+    return this.userService.getCreatorDashboard(userId);
+  }
 }
