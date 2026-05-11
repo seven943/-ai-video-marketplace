@@ -17,8 +17,8 @@ RUN cd backend && npx prisma generate
 # Copy backend source
 COPY backend ./backend/
 
-RUN cd backend && npm run build
+RUN cd backend && npx nest build
 
 EXPOSE 3001
 
-CMD ["node", "backend/dist/main.js"]
+CMD ["node", "backend/dist/src/main.js"]
