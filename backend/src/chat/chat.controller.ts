@@ -3,6 +3,8 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { ChatService } from './chat.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { Roles } from '../common/decorators/roles.decorator';
+import { RolesGuard } from '../common/guards/roles.guard';
 
 @ApiTags('聊天')
 @Controller('chat')
@@ -63,7 +65,8 @@ export class ChatController {
 
   // 管理员接口
   @Get('admin/conversations')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('ADMIN')
   @ApiBearerAuth()
   @ApiOperation({ summary: '管理员 - 所有会话' })
   async adminGetConversations(
@@ -77,7 +80,8 @@ export class ChatController {
   }
 
   @Get('admin/messages')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('ADMIN')
   @ApiBearerAuth()
   @ApiOperation({ summary: '管理员 - 所有消息' })
   async adminGetAllMessages(
@@ -91,7 +95,8 @@ export class ChatController {
   }
 
   @Get('admin/blocked')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('ADMIN')
   @ApiBearerAuth()
   @ApiOperation({ summary: '管理员 - 被拦截消息' })
   async adminGetBlockedMessages(

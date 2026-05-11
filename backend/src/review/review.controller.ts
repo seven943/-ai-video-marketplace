@@ -3,6 +3,8 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { ReviewService } from './review.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { Roles } from '../common/decorators/roles.decorator';
+import { RolesGuard } from '../common/guards/roles.guard';
 
 @ApiTags('评价')
 @Controller('reviews')
@@ -10,7 +12,8 @@ export class ReviewController {
   constructor(private reviewService: ReviewService) {}
 
   @Post()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('BUYER', 'BOTH')
   @ApiBearerAuth()
   @ApiOperation({ summary: '创建评价' })
   async create(

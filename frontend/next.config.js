@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: false,
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: '**.aliyuncs.com' },
@@ -18,6 +19,12 @@ const nextConfig = {
         destination: 'http://localhost:3001/uploads/:path*',
       },
     ];
+  },
+  webpack: (config, { dev }) => {
+    if (dev) {
+      config.output.chunkFilename = 'static/chunks/[name].js';
+    }
+    return config;
   },
 };
 

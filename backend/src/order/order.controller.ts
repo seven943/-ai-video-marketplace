@@ -3,6 +3,8 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { OrderService } from './order.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { Roles } from '../common/decorators/roles.decorator';
+import { RolesGuard } from '../common/guards/roles.guard';
 
 @ApiTags('订单')
 @Controller('orders')
@@ -13,11 +15,21 @@ export class OrderController {
   @ApiOperation({ summary: '订单列表' })
   async list(
     @Query('status') status?: string,
+    @Query('category') category?: string,
+    @Query('budgetMin') budgetMin?: string,
+    @Query('budgetMax') budgetMax?: string,
+    @Query('keyword') keyword?: string,
+    @Query('sort') sort?: string,
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
   ) {
     return this.orderService.list({
       status,
+      category,
+      budgetMin: budgetMin ? parseInt(budgetMin) : undefined,
+      budgetMax: budgetMax ? parseInt(budgetMax) : undefined,
+      keyword,
+      sort,
       page: page ? parseInt(page) : 1,
       pageSize: pageSize ? parseInt(pageSize) : 20,
     });
@@ -32,7 +44,8 @@ export class OrderController {
   }
 
   @Post()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('BUYER', 'BOTH')
   @ApiBearerAuth()
   @ApiOperation({ summary: '发布需求' })
   async create(
@@ -43,7 +56,8 @@ export class OrderController {
   }
 
   @Post(':id/accept')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('CREATOR', 'BOTH')
   @ApiBearerAuth()
   @ApiOperation({ summary: '接单' })
   async accept(
@@ -54,7 +68,8 @@ export class OrderController {
   }
 
   @Post(':id/submit-quote')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('CREATOR', 'BOTH')
   @ApiBearerAuth()
   @ApiOperation({ summary: '创作者报价' })
   async submitQuote(
@@ -66,7 +81,8 @@ export class OrderController {
   }
 
   @Post(':id/accept-quote')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('BUYER', 'BOTH')
   @ApiBearerAuth()
   @ApiOperation({ summary: '买家接受报价' })
   async acceptQuote(
@@ -77,7 +93,8 @@ export class OrderController {
   }
 
   @Post(':id/reject-quote')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('BUYER', 'BOTH')
   @ApiBearerAuth()
   @ApiOperation({ summary: '买家拒绝报价' })
   async rejectQuote(
@@ -88,7 +105,8 @@ export class OrderController {
   }
 
   @Post(':id/deliver')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('CREATOR', 'BOTH')
   @ApiBearerAuth()
   @ApiOperation({ summary: '交付' })
   async deliver(
@@ -99,7 +117,8 @@ export class OrderController {
   }
 
   @Post(':id/complete')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('BUYER', 'BOTH')
   @ApiBearerAuth()
   @ApiOperation({ summary: '验收完成' })
   async complete(
@@ -110,7 +129,8 @@ export class OrderController {
   }
 
   @Post(':id/start')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('CREATOR', 'BOTH')
   @ApiBearerAuth()
   @ApiOperation({ summary: '开始制作' })
   async startWork(
@@ -121,7 +141,8 @@ export class OrderController {
   }
 
   @Post(':id/request-revision')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('BUYER', 'BOTH')
   @ApiBearerAuth()
   @ApiOperation({ summary: '要求修改' })
   async requestRevision(

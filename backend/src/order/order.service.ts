@@ -12,10 +12,30 @@ export class OrderService {
     private chatService: ChatService,
   ) {}
 
-  async list(params: { status?: string; page?: number; pageSize?: number }) {
-    const { status, page = 1, pageSize = 20 } = params;
+  async list(params: { status?: string; category?: string; budgetMin?: number; budgetMax?: number; keyword?: string; sort?: string; page?: number; pageSize?: number }) {
+    const { status, category, budgetMin, budgetMax, keyword, sort, page = 1, pageSize = 20 } = params;
     const where: any = {};
     if (status) where.status = status as OrderStatus;
+    if (category) where.category = category as VideoCategory;
+    if (budgetMin || budgetMax) {
+      where.AND = where.AND || [];
+      if (budgetMin) {
+        where.AND.push({ budgetMax: { gte: budgetMin } });
+      }
+      if (budgetMax) {
+        where.AND.push({ budgetMin: { lte: budgetMax } });
+      }
+    }
+    if (keyword) {
+      where.OR = [
+        { title: { contains: keyword, mode: 'insensitive' } },
+        { description: { contains: keyword, mode: 'insensitive' } },
+      ];
+    }
+
+    let orderBy: any = { createdAt: 'desc' };
+    if (sort === 'budget_asc') orderBy = { budgetMin: 'asc' };
+    else if (sort === 'budget_desc') orderBy = { budgetMax: 'desc' };
 
     const [items, total] = await Promise.all([
       this.prisma.order.findMany({
@@ -24,7 +44,7 @@ export class OrderService {
           buyer: { select: { id: true, nickname: true, avatar: true } },
           creator: { select: { id: true, nickname: true, avatar: true } },
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy,
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),
