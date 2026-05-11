@@ -9,16 +9,19 @@ const nextConfig = {
     ],
   },
   async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'http://localhost:3001/api/:path*',
-      },
-      {
-        source: '/uploads/:path*',
-        destination: 'http://localhost:3001/uploads/:path*',
-      },
-    ];
+    if (process.env.NODE_ENV === 'development') {
+      return [
+        {
+          source: '/api/:path*',
+          destination: 'http://localhost:3001/api/:path*',
+        },
+        {
+          source: '/uploads/:path*',
+          destination: 'http://localhost:3001/uploads/:path*',
+        },
+      ];
+    }
+    return [];
   },
   webpack: (config, { dev }) => {
     if (dev) {

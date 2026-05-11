@@ -1,7 +1,9 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
+const apiBaseURL = process.env.NEXT_PUBLIC_API_URL || '/api';
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: apiBaseURL,
   timeout: 30000,
   headers: { 'Content-Type': 'application/json' },
 });
