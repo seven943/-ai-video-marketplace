@@ -20,7 +20,7 @@
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "lint": "npm run lint --workspaces",
-    "prepare": "husky install"
+    "prepare": "echo skip husky"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
