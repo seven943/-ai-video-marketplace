@@ -6,7 +6,6 @@
   body {
     @apply bg-purple-50 text-gray-900 antialiased;
     background-image: radial-gradient(ellipse at top, rgba(237, 233, 254, 0.8), transparent 60%);
-    background-attachment: fixed;
   }
 
   ::selection {

@@ -123,17 +123,45 @@ export function Header() {
               {link.label}
             </Link>
           ))}
+          {isAdmin && (
+            <>
+              <Link href="/admin/review" className="flex items-center gap-2 py-2 text-sm text-primary-600" onClick={() => setMobileOpen(false)}>
+                <ShieldCheck className="h-4 w-4" /> 审核中心
+              </Link>
+              <Link href="/admin/chat" className="flex items-center gap-2 py-2 text-sm text-primary-600" onClick={() => setMobileOpen(false)}>
+                <MessageSquare className="h-4 w-4" /> 聊天监控
+              </Link>
+            </>
+          )}
+          {isAuthenticated() && (user?.role === 'CREATOR' || user?.role === 'BOTH' || isAdmin) && (
+            <Link href="/dashboard" className="flex items-center gap-2 py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>
+              <BarChart3 className="h-4 w-4" /> 数据看板
+            </Link>
+          )}
+          {isAuthenticated() && (
+            <>
+              <Link href="/chat" className="flex items-center gap-2 py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>
+                <MessageSquare className="h-4 w-4" /> 聊天
+              </Link>
+              <Link href="/notifications" className="flex items-center gap-2 py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>
+                通知
+              </Link>
+              <Link href="/profile" className="flex items-center gap-2 py-2 text-sm text-gray-600" onClick={() => setMobileOpen(false)}>
+                <User className="h-4 w-4" /> 个人中心
+              </Link>
+            </>
+          )}
           <div className="mt-3 flex gap-2 border-t border-gray-100 pt-3">
             {isAuthenticated() ? (
-              <button onClick={logout} className="btn-secondary text-sm">
+              <button onClick={() => { logout(); setMobileOpen(false); }} className="btn-secondary text-sm">
                 退出登录
               </button>
             ) : (
               <>
-                <Link href="/login" className="btn-secondary text-sm">
+                <Link href="/login" className="btn-secondary text-sm" onClick={() => setMobileOpen(false)}>
                   登录
                 </Link>
-                <Link href="/register" className="btn-primary text-sm">
+                <Link href="/register" className="btn-primary text-sm" onClick={() => setMobileOpen(false)}>
                   注册
                 </Link>
               </>

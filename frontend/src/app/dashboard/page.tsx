@@ -185,7 +185,7 @@ export default function DashboardPage() {
           <Eye className="h-4 w-4 text-primary-500" />
           作品数据
         </h2>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="text-center">
             <p className="text-2xl font-bold text-gray-900">{data.works.count}</p>
             <p className="text-xs text-gray-500">作品数量</p>

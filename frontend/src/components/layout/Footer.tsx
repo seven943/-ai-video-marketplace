@@ -31,9 +31,9 @@ export function Footer() {
           <div>
             <h3 className="text-sm font-semibold text-gray-900">支持</h3>
             <ul className="mt-3 space-y-2">
-              <li><Link href="/help" className="text-sm text-gray-500 hover:text-primary-600 transition-colors">帮助中心</Link></li>
-              <li><Link href="/terms" className="text-sm text-gray-500 hover:text-primary-600 transition-colors">服务条款</Link></li>
-              <li><Link href="/privacy" className="text-sm text-gray-500 hover:text-primary-600 transition-colors">隐私政策</Link></li>
+              <li><span className="text-sm text-gray-400">帮助中心（即将上线）</span></li>
+              <li><span className="text-sm text-gray-400">服务条款（即将上线）</span></li>
+              <li><span className="text-sm text-gray-400">隐私政策（即将上线）</span></li>
             </ul>
           </div>
 
