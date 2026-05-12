@@ -55,11 +55,11 @@ export class WorksService {
     title: string;
     coverUrl: string;
     videoUrl: string;
-    category: VideoCategory;
+    category: string;
     tags?: string[];
   }) {
     return this.prisma.work.create({
-      data: { creatorId: userId, ...data },
+      data: { creatorId: userId, ...data, category: data.category as VideoCategory },
     });
   }
 

@@ -5,6 +5,7 @@ import { OrderService } from './order.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { CreateOrderDto, SubmitQuoteDto } from './dto';
 
 @ApiTags('订单')
 @Controller('orders')
@@ -50,9 +51,9 @@ export class OrderController {
   @ApiOperation({ summary: '发布需求' })
   async create(
     @CurrentUser('id') userId: string,
-    @Body() body: any,
+    @Body() dto: CreateOrderDto,
   ) {
-    return this.orderService.create(userId, body);
+    return this.orderService.create(userId, dto);
   }
 
   @Post(':id/accept')
@@ -75,9 +76,9 @@ export class OrderController {
   async submitQuote(
     @Param('id') id: string,
     @CurrentUser('id') creatorId: string,
-    @Body() body: { quotedPrice: number; quotedDeadline: string },
+    @Body() dto: SubmitQuoteDto,
   ) {
-    return this.orderService.submitQuote(id, creatorId, body.quotedPrice, body.quotedDeadline);
+    return this.orderService.submitQuote(id, creatorId, dto.quotedPrice, dto.quotedDeadline);
   }
 
   @Post(':id/accept-quote')

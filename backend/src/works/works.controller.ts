@@ -5,6 +5,7 @@ import { WorksService } from './works.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { CreateWorkDto } from './dto';
 
 @ApiTags('作品')
 @Controller('works')
@@ -38,9 +39,9 @@ export class WorksController {
   @ApiOperation({ summary: '发布作品' })
   async create(
     @CurrentUser('id') userId: string,
-    @Body() body: { title: string; coverUrl: string; videoUrl: string; category: string; tags?: string[] },
+    @Body() dto: CreateWorkDto,
   ) {
-    return this.worksService.create(userId, body as any);
+    return this.worksService.create(userId, dto);
   }
 
   @Post(':id/like')

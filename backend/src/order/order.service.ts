@@ -77,7 +77,7 @@ export class OrderService {
   async create(userId: string, data: {
     title: string;
     description: string;
-    category: VideoCategory;
+    category: string;
     budgetMin: number;
     budgetMax: number;
     deadline: string;
@@ -87,6 +87,7 @@ export class OrderService {
       data: {
         buyerId: userId,
         ...data,
+        category: data.category as VideoCategory,
         deadline: new Date(data.deadline),
       },
     });

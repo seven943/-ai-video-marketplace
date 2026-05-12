@@ -5,6 +5,7 @@ import { ReviewService } from './review.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { CreateReviewDto } from './dto';
 
 @ApiTags('评价')
 @Controller('reviews')
@@ -18,13 +19,13 @@ export class ReviewController {
   @ApiOperation({ summary: '创建评价' })
   async create(
     @CurrentUser('id') userId: string,
-    @Body() body: { orderId: string; rating: number; content: string },
+    @Body() dto: CreateReviewDto,
   ) {
     return this.reviewService.create({
-      orderId: body.orderId,
+      orderId: dto.orderId,
       reviewerId: userId,
-      rating: body.rating,
-      content: body.content,
+      rating: dto.rating,
+      content: dto.content,
     });
   }
 

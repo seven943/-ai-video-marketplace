@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { IoAdapter } from '@nestjs/platform-socket.io';
+import helmet from 'helmet';
 import { join } from 'path';
 import { AppModule } from './app.module';
 
@@ -17,6 +18,9 @@ async function bootstrap() {
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true,
   });
+
+  // Helmet - HTTP 安全头
+  app.use(helmet());
 
   // 静态文件：uploads 目录
   app.useStaticAssets(join(process.cwd(), 'uploads'), { prefix: '/uploads' });

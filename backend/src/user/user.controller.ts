@@ -5,6 +5,7 @@ import { UserService } from './user.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { UpdateProfileDto, RegisterCreatorDto, UpdateCreatorProfileDto } from './dto';
 
 @ApiTags('用户')
 @Controller()
@@ -25,9 +26,9 @@ export class UserController {
   @ApiOperation({ summary: '更新用户信息' })
   async updateProfile(
     @CurrentUser('id') userId: string,
-    @Body() body: { nickname?: string; avatar?: string },
+    @Body() dto: UpdateProfileDto,
   ) {
-    return this.userService.updateProfile(userId, body);
+    return this.userService.updateProfile(userId, dto);
   }
 
   @Get('creators')
@@ -69,9 +70,9 @@ export class UserController {
   @ApiOperation({ summary: '注册成为创作者' })
   async registerCreator(
     @CurrentUser('id') userId: string,
-    @Body() body: { bio?: string; tags?: string[]; aiTools?: string[]; priceMin?: number; priceMax?: number },
+    @Body() dto: RegisterCreatorDto,
   ) {
-    return this.userService.registerCreator(userId, body);
+    return this.userService.registerCreator(userId, dto);
   }
 
   @Patch('creators/profile')
@@ -81,9 +82,9 @@ export class UserController {
   @ApiOperation({ summary: '更新创作者资料' })
   async updateCreatorProfile(
     @CurrentUser('id') userId: string,
-    @Body() body: { bio?: string; tags?: string[]; aiTools?: string[]; priceMin?: number; priceMax?: number; portfolioUrls?: string[]; status?: string },
+    @Body() dto: UpdateCreatorProfileDto,
   ) {
-    return this.userService.updateCreatorProfile(userId, body);
+    return this.userService.updateCreatorProfile(userId, dto);
   }
 
   @Get('dashboard/creator')
