@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /chat/
+Disallow: /api/
+Disallow: /profile
+Disallow: /dashboard
+Disallow: /notifications
+
+Sitemap: https://ai-video-marketplace-frontend-b1ai.vercel.app/sitemap.xml

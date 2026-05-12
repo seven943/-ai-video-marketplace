@@ -47,9 +47,27 @@ const stats = [
   { label: '满意度', value: '98%', icon: Star },
 ];
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'AI视频工场',
+  url: 'https://ai-video-marketplace-frontend-b1ai.vercel.app',
+  description: '一站式AI视频供需交易平台，连接AI视频创作者与需求方',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: 'https://ai-video-marketplace-frontend-b1ai.vercel.app/works?keyword={search_term_string}',
+    'query-input': 'required name=search_term_string',
+  },
+};
+
 export default function HomePage() {
   return (
-    <div className="min-h-screen">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div className="min-h-screen">
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10">
@@ -185,5 +203,6 @@ export default function HomePage() {
         </div>
       </section>
     </div>
+    </>
   );
 }

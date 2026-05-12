@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   },
   description: '一站式AI视频供需交易平台，让AI视频创作更简单。专业AI视频创作者为您制作商品展示、品牌宣传、短视频等内容。',
   keywords: ['AI视频', '视频制作', '视频创作', '商品展示视频', '品牌宣传', '短视频制作', 'AI视频工场'],
-  metadataBase: new URL('https://aivideo.com'),
+  metadataBase: new URL('https://ai-video-marketplace-frontend-b1ai.vercel.app'),
   openGraph: {
     type: 'website',
     locale: 'zh_CN',
