@@ -172,3 +172,14 @@ export const chatApi = {
   adminBlocked: (params?: { page?: number; pageSize?: number }) =>
     api.get('/chat/admin/blocked', { params }),
 };
+
+// ========== 管理后台 ==========
+export const adminApi = {
+  stats: () => api.get('/admin/stats'),
+  users: (params?: { page?: number; pageSize?: number; role?: string; keyword?: string }) =>
+    api.get('/admin/users', { params }),
+  updateUserRole: (id: string, role: string) =>
+    api.patch(`/admin/users/${id}/role`, { role }),
+  orders: (params?: { page?: number; pageSize?: number; status?: string; keyword?: string }) =>
+    api.get('/admin/orders', { params }),
+};
