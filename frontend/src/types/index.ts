@@ -134,6 +134,19 @@ export interface Review {
   createdAt: string;
 }
 
+// ========== 聊天 ==========
+export interface Conversation {
+  id: string;
+  orderId: string;
+  buyerId: string;
+  creatorId: string;
+  updatedAt: string;
+  order: { id: string; title: string; status: string };
+  buyer: { id: string; nickname: string; avatar: string };
+  creator: { id: string; nickname: string; avatar: string };
+  messages: { content: string; createdAt: string; senderId: string; blocked: boolean }[];
+}
+
 // ========== API ==========
 export interface ApiResponse<T = unknown> {
   code: number;

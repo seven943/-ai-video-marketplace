@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Loader2, DollarSign, TrendingUp, Package, Star, Eye, Heart, BarChart3, PieChart } from 'lucide-react';
 import { creatorApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
-import { ORDER_STATUS_LABELS } from '@/types';
+import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from '@/types';
 import { cn } from '@/lib/utils';
 
 interface DashboardData {
@@ -16,18 +16,6 @@ interface DashboardData {
   monthlyRevenue: { month: string; amount: number }[];
   orderStatusDist: { status: string; count: number }[];
 }
-
-const STATUS_COLORS: Record<string, string> = {
-  PENDING: 'bg-yellow-400',
-  MATCHED: 'bg-blue-400',
-  QUOTING: 'bg-cyan-400',
-  QUOTE_ACCEPTED: 'bg-teal-400',
-  IN_PROGRESS: 'bg-purple-400',
-  REVIEWING: 'bg-orange-400',
-  REVISION: 'bg-orange-300',
-  COMPLETED: 'bg-green-400',
-  CANCELLED: 'bg-gray-400',
-};
 
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user);
@@ -168,7 +156,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-gray-100">
                     <div
-                      className={cn('h-full rounded-full', STATUS_COLORS[item.status] || 'bg-gray-300')}
+                      className={cn('h-full rounded-full', ORDER_STATUS_COLORS[item.status as keyof typeof ORDER_STATUS_COLORS] || 'bg-gray-300')}
                       style={{ width: `${pct}%` }}
                     />
                   </div>

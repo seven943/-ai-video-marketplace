@@ -8,16 +8,7 @@ import toast from 'react-hot-toast';
 import { creatorApi, userApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
-
-const TAG_OPTIONS = [
-  '商品展示', '品牌宣传', '短视频', '解说视频', '社交媒体', '教育培训', '娱乐创意',
-  '产品评测', '直播切片', '动画制作', '特效合成', '口播视频',
-];
-
-const AI_TOOL_OPTIONS = [
-  'Kling', 'Runway', 'Flux', 'Pika', 'Sora', 'HeyGen', 'Synthesia',
-  'D-ID', 'CapCut', 'Stable Diffusion', 'Midjourney', 'ComfyUI',
-];
+import { TAG_OPTIONS, AI_TOOL_OPTIONS } from '@/lib/constants';
 
 const STATUS_OPTIONS = [
   { value: 'ONLINE', label: '在线接单', color: 'bg-green-100 text-green-700 ring-green-200' },

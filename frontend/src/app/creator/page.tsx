@@ -5,9 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Sparkles, Check, Loader2, Zap, Star, TrendingUp } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { creatorApi } from '@/lib/api';
-
-const aiToolOptions = ['Kling', 'Runway', 'Flux', 'Sora', 'Pika', 'Midjourney', 'Stable Diffusion', 'ComfyUI'];
-const tagOptions = ['商品展示', '品牌宣传', '短视频', '解说视频', '社交媒体', '教育培训', '娱乐创意', '动画'];
+import { TAG_OPTIONS, AI_TOOL_OPTIONS } from '@/lib/constants';
 
 export default function CreatorPage() {
   const router = useRouter();
@@ -82,7 +80,7 @@ export default function CreatorPage() {
             <label className="block text-sm font-medium text-gray-700">擅长领域 <span className="text-red-400">*</span></label>
             <p className="mt-1 text-xs text-gray-400">选择你擅长的视频类型（可多选）</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              {tagOptions.map((tag) => (
+              {TAG_OPTIONS.map((tag) => (
                 <button key={tag} type="button" onClick={() => toggleItem('tags', tag)}
                   className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
                     form.tags.includes(tag)
@@ -100,7 +98,7 @@ export default function CreatorPage() {
             <label className="block text-sm font-medium text-gray-700">常用 AI 工具</label>
             <p className="mt-1 text-xs text-gray-400">选择你使用的AI视频/图片生成工具</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              {aiToolOptions.map((tool) => (
+              {AI_TOOL_OPTIONS.map((tool) => (
                 <button key={tool} type="button" onClick={() => toggleItem('aiTools', tool)}
                   className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
                     form.aiTools.includes(tool)

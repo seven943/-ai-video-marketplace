@@ -7,18 +7,7 @@ import { chatApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { useSocket } from '@/lib/socket';
 import { ConversationList } from '@/components/chat/ConversationList';
-
-interface Conversation {
-  id: string;
-  orderId: string;
-  buyerId: string;
-  creatorId: string;
-  updatedAt: string;
-  order: { id: string; title: string; status: string };
-  buyer: { id: string; nickname: string; avatar: string };
-  creator: { id: string; nickname: string; avatar: string };
-  messages: { content: string; createdAt: string; senderId: string; blocked: boolean }[];
-}
+import type { Conversation } from '@/types';
 
 export default function ChatPage() {
   const user = useAuthStore((s) => s.user);
