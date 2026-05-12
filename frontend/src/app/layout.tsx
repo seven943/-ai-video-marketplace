@@ -1,9 +1,16 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Toaster } from 'react-hot-toast';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { HydrateAuth } from '@/components/providers/HydrateAuth';
+import { RegisterSW } from '@/components/providers/RegisterSW';
 import '@/styles/globals.css';
+
+export const viewport: Viewport = {
+  themeColor: '#6366f1',
+  width: 'device-width',
+  initialScale: 1,
+};
 
 export const metadata: Metadata = {
   title: {
@@ -26,7 +33,9 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: '/favicon.svg',
+    apple: '/icon-192.svg',
   },
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
@@ -38,6 +47,7 @@ export default function RootLayout({
     <html lang="zh-CN">
       <body className="flex min-h-screen flex-col">
         <HydrateAuth />
+        <RegisterSW />
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
