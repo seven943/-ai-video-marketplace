@@ -7,6 +7,7 @@ import { chatApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { useSocket } from '@/lib/socket';
 import { ConversationList } from '@/components/chat/ConversationList';
+import { ErrorState } from '@/components/ui/ErrorState';
 import type { Conversation } from '@/types';
 
 export default function ChatPage() {
@@ -14,12 +15,15 @@ export default function ChatPage() {
   const { socket } = useSocket();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const fetchConversations = useCallback(async () => {
     try {
       const res = await chatApi.conversations() as any;
       setConversations(Array.isArray(res) ? res : []);
-    } catch {} finally {
+    } catch {
+      setError(true);
+    } finally {
       setLoading(false);
     }
   }, []);
@@ -49,6 +53,8 @@ export default function ChatPage() {
           <div className="flex items-center justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
           </div>
+        ) : error ? (
+          <ErrorState onRetry={fetchConversations} />
         ) : (
           <ConversationList conversations={conversations} userId={user.id} />
         )}

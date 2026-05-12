@@ -4,11 +4,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { chatApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { useSocket } from '@/lib/socket';
 import { ChatWindow } from '@/components/chat/ChatWindow';
 import { ConversationList } from '@/components/chat/ConversationList';
+import { ErrorState } from '@/components/ui/ErrorState';
 import type { Conversation } from '@/types';
 
 export default function ChatDetailPage() {
@@ -19,6 +21,7 @@ export default function ChatDetailPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConv, setCurrentConv] = useState<Conversation | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -26,7 +29,9 @@ export default function ChatDetailPage() {
       const convs = Array.isArray(res) ? res : [];
       setConversations(convs);
       setCurrentConv(convs.find((c: Conversation) => c.id === conversationId) || null);
-    } catch {} finally {
+    } catch {
+      setError(true);
+    } finally {
       setLoading(false);
     }
   }, [conversationId]);
@@ -50,6 +55,10 @@ export default function ChatDetailPage() {
         <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
       </div>
     );
+  }
+
+  if (error) {
+    return <ErrorState onRetry={fetchData} />;
   }
 
   return (

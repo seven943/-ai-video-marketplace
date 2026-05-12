@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Search, Users, Loader2, Star, Filter, X } from 'lucide-react';
 import { creatorApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import { ErrorState } from '@/components/ui/ErrorState';
 
 const popularTags = ['商品展示', '品牌宣传', '短视频', '解说视频', '社交媒体', '教育培训', '娱乐创意'];
 const popularAiTools = ['Kling', 'Runway', 'Sora', 'Midjourney', 'ComfyUI', 'Flux', 'Pika', 'Stable Diffusion'];
@@ -32,6 +33,7 @@ interface Creator {
 export default function CreatorsPage() {
   const [creators, setCreators] = useState<Creator[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [keyword, setKeyword] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedTools, setSelectedTools] = useState<string[]>([]);
@@ -40,6 +42,7 @@ export default function CreatorsPage() {
 
   const fetchCreators = useCallback(async () => {
     setLoading(true);
+    setError('');
     try {
       const params: any = { page: 1, pageSize: 50 };
       if (keyword) params.keyword = keyword;
@@ -53,6 +56,7 @@ export default function CreatorsPage() {
       setCreators(res.items || []);
     } catch {
       setCreators([]);
+      setError('加载创作者失败');
     } finally {
       setLoading(false);
     }
@@ -190,6 +194,8 @@ export default function CreatorsPage() {
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
         </div>
+      ) : error ? (
+        <ErrorState message={error} onRetry={fetchCreators} />
       ) : creators.length > 0 ? (
         <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {creators.map((creator) => (

@@ -6,6 +6,7 @@ import { Plus, Search, FileText, Loader2, SlidersHorizontal, X } from 'lucide-re
 import toast from 'react-hot-toast';
 import { OrderCard } from '@/components/ui/OrderCard';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { ORDER_STATUS_LABELS, VIDEO_CATEGORY_LABELS, type OrderStatus, type VideoCategory, type Order } from '@/types';
 import { orderApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
@@ -51,6 +52,7 @@ export default function OrdersPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [acceptingId, setAcceptingId] = useState('');
   const [debouncedKeyword, setDebouncedKeyword] = useState('');
   const searchTimerRef = useRef<NodeJS.Timeout>();
@@ -70,6 +72,7 @@ export default function OrdersPage() {
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
+    setError('');
     try {
       const params: any = { page: 1, pageSize: 50 };
       if (activeStatus !== 'all') params.status = activeStatus;
@@ -82,6 +85,7 @@ export default function OrdersPage() {
       setOrders(res.items || []);
     } catch {
       setOrders([]);
+      setError('加载订单失败');
     } finally {
       setLoading(false);
     }
@@ -265,6 +269,8 @@ export default function OrdersPage() {
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
         </div>
+      ) : error ? (
+        <ErrorState message={error} onRetry={fetchOrders} />
       ) : orders.length > 0 ? (
         <div className="mt-6 space-y-4">
           {orders.map((order) => (

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Search, Sparkles, Loader2, Plus } from 'lucide-react';
 import { WorkCard } from '@/components/ui/WorkCard';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { ErrorState } from '@/components/ui/ErrorState';
 import { VIDEO_CATEGORY_LABELS, type VideoCategory, type Work } from '@/types';
 import { worksApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
@@ -26,9 +27,11 @@ export default function WorksPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [works, setWorks] = useState<Work[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const fetchWorks = useCallback(async () => {
     setLoading(true);
+    setError('');
     try {
       const params: any = { page: 1, pageSize: 50 };
       if (activeCategory !== 'all') params.category = activeCategory;
@@ -36,6 +39,7 @@ export default function WorksPage() {
       setWorks(res.items || []);
     } catch {
       setWorks([]);
+      setError('加载作品失败');
     } finally {
       setLoading(false);
     }
@@ -91,6 +95,8 @@ export default function WorksPage() {
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
         </div>
+      ) : error ? (
+        <ErrorState message={error} onRetry={fetchWorks} />
       ) : filteredWorks.length > 0 ? (
         <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {filteredWorks.map((work) => (

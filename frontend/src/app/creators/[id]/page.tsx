@@ -52,6 +52,7 @@ export default function CreatorDetailPage() {
         if (reviewsRes.status === 'fulfilled') setReviews((reviewsRes.value as any)?.items || []);
       } catch {
         setCreator(null);
+        toast.error('加载创作者信息失败');
       } finally {
         setLoading(false);
       }

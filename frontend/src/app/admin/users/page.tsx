@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Loader2, Search, Shield } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { adminApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import { ErrorState } from '@/components/ui/ErrorState';
 
 interface User {
   id: string;
@@ -26,6 +28,7 @@ const ROLE_COLORS: Record<string, string> = {
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [keyword, setKeyword] = useState('');
@@ -33,11 +36,14 @@ export default function AdminUsersPage() {
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
+    setError(false);
     try {
       const res = await adminApi.users({ page, pageSize: 20, role: roleFilter || undefined, keyword: keyword || undefined }) as any;
       setUsers(res.items || []);
       setTotalPages(res.totalPages || 1);
-    } catch {} finally {
+    } catch {
+      setError(true);
+    } finally {
       setLoading(false);
     }
   }, [page, roleFilter, keyword]);
@@ -48,7 +54,8 @@ export default function AdminUsersPage() {
     try {
       await adminApi.updateUserRole(userId, newRole);
       setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, role: newRole } : u));
-    } catch {}
+      toast.success('角色已更新');
+    } catch { toast.error('更新失败'); }
   };
 
   return (
@@ -79,6 +86,8 @@ export default function AdminUsersPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary-500" /></div>
+      ) : error ? (
+        <ErrorState onRetry={fetchUsers} />
       ) : (
         <>
           <div className="card overflow-hidden">

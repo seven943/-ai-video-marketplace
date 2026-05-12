@@ -6,6 +6,7 @@ import { Loader2, Search } from 'lucide-react';
 import { adminApi } from '@/lib/api';
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from '@/types';
 import { cn } from '@/lib/utils';
+import { ErrorState } from '@/components/ui/ErrorState';
 
 interface Order {
   id: string;
@@ -23,6 +24,7 @@ const STATUS_OPTIONS = ['', 'PENDING', 'MATCHED', 'QUOTING', 'IN_PROGRESS', 'REV
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [keyword, setKeyword] = useState('');
@@ -30,11 +32,14 @@ export default function AdminOrdersPage() {
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
+    setError(false);
     try {
       const res = await adminApi.orders({ page, pageSize: 20, status: statusFilter || undefined, keyword: keyword || undefined }) as any;
       setOrders(res.items || []);
       setTotalPages(res.totalPages || 1);
-    } catch {} finally {
+    } catch {
+      setError(true);
+    } finally {
       setLoading(false);
     }
   }, [page, statusFilter, keyword]);
@@ -71,6 +76,8 @@ export default function AdminOrdersPage() {
 
       {loading ? (
         <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary-500" /></div>
+      ) : error ? (
+        <ErrorState onRetry={fetchOrders} />
       ) : (
         <>
           <div className="card overflow-hidden">

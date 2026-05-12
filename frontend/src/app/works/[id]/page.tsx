@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Eye, Heart, Calendar, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { worksApi } from '@/lib/api';
 import { VIDEO_CATEGORY_LABELS, type Work } from '@/types';
 
@@ -19,6 +20,7 @@ export default function WorkDetailPage() {
         setWork(res);
       } catch {
         setWork(null);
+        toast.error('加载作品失败');
       } finally {
         setLoading(false);
       }

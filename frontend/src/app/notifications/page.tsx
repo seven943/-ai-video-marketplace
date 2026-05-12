@@ -3,9 +3,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Bell, Loader2, CheckCheck } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { notificationApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
+import { ErrorState } from '@/components/ui/ErrorState';
 
 interface Notification {
   id: string;
@@ -21,14 +23,17 @@ export default function NotificationsPage() {
   const user = useAuthStore((s) => s.user);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const fetchNotifications = useCallback(async () => {
     setLoading(true);
+    setError('');
     try {
       const res = await notificationApi.list({ page: 1, pageSize: 50 }) as any;
       setNotifications(res.items || []);
     } catch {
       setNotifications([]);
+      setError('加载通知失败');
     } finally {
       setLoading(false);
     }
@@ -42,14 +47,14 @@ export default function NotificationsPage() {
     try {
       await notificationApi.markAsRead(id);
       setNotifications((prev) => prev.map((n) => n.id === id ? { ...n, read: true } : n));
-    } catch {}
+    } catch { toast.error('操作失败'); }
   };
 
   const handleMarkAllAsRead = async () => {
     try {
       await notificationApi.markAllAsRead();
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    } catch {}
+    } catch { toast.error('操作失败'); }
   };
 
   if (!user) {
@@ -83,6 +88,8 @@ export default function NotificationsPage() {
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
         </div>
+      ) : error ? (
+        <ErrorState message={error} onRetry={fetchNotifications} />
       ) : notifications.length > 0 ? (
         <div className="card divide-y divide-primary-50">
           {notifications.map((n) => (

@@ -44,6 +44,7 @@ export default function OrderDetailPage() {
       setOrder(res);
     } catch {
       setOrder(null);
+      toast.error('加载订单失败');
     } finally {
       setLoading(false);
     }

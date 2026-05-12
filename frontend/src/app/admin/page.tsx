@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Users, ShoppingCart, DollarSign, Video, TrendingUp, Loader2 } from 'lucide-react';
 import { adminApi } from '@/lib/api';
 import { ORDER_STATUS_LABELS } from '@/types';
+import { ErrorState } from '@/components/ui/ErrorState';
 
 interface Stats {
   totalUsers: number;
@@ -20,16 +21,24 @@ interface Stats {
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    adminApi.stats().then((res: any) => setStats(res)).catch(() => {}).finally(() => setLoading(false));
-  }, []);
+  const fetchStats = () => {
+    setLoading(true);
+    setError(false);
+    adminApi.stats()
+      .then((res: any) => setStats(res))
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { fetchStats(); }, []);
 
   if (loading) {
     return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary-500" /></div>;
   }
 
-  if (!stats) return <p className="text-center text-gray-500 py-20">加载失败</p>;
+  if (error || !stats) return <ErrorState onRetry={fetchStats} />;
 
   const cards = [
     { label: '总用户', value: stats.totalUsers, icon: Users, color: 'bg-blue-50 text-blue-600' },
