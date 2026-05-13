@@ -4,6 +4,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { HydrateAuth } from '@/components/providers/HydrateAuth';
 import { RegisterSW } from '@/components/providers/RegisterSW';
+import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import '@/styles/globals.css';
 
 export const viewport: Viewport = {
@@ -46,12 +47,14 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body className="flex min-h-screen flex-col">
-        <HydrateAuth />
-        <RegisterSW />
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <Toaster position="top-center" />
+        <ThemeProvider>
+          <HydrateAuth />
+          <RegisterSW />
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+          <Toaster position="top-center" />
+        </ThemeProvider>
       </body>
     </html>
   );

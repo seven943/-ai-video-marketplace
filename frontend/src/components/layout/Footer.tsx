@@ -3,7 +3,7 @@ import { Video, Heart } from 'lucide-react';
 
 export function Footer() {
   return (
-    <footer className="border-t border-primary-100/50 bg-white/60 backdrop-blur-sm">
+    <footer className="border-t border-primary-100/50 bg-white/60 backdrop-blur-sm dark:border-gray-800 dark:bg-gray-950/60">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           {/* Brand */}
@@ -14,34 +14,34 @@ export function Footer() {
               </div>
               <span className="text-lg font-bold bg-gradient-to-r from-primary-700 to-accent-600 bg-clip-text text-transparent">AI视频工场</span>
             </Link>
-            <p className="mt-3 text-sm text-gray-500 leading-relaxed">
+            <p className="mt-3 text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
               连接AI视频创作者与需求方，让视频创作更简单高效。
             </p>
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-gray-900">平台</h3>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">平台</h3>
             <ul className="mt-3 space-y-2">
-              <li><Link href="/works" className="text-sm text-gray-500 hover:text-primary-600 transition-colors">浏览作品</Link></li>
-              <li><Link href="/orders" className="text-sm text-gray-500 hover:text-primary-600 transition-colors">需求大厅</Link></li>
-              <li><Link href="/creator" className="text-sm text-gray-500 hover:text-primary-600 transition-colors">成为创作者</Link></li>
+              <li><Link href="/works" className="text-sm text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">浏览作品</Link></li>
+              <li><Link href="/orders" className="text-sm text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">需求大厅</Link></li>
+              <li><Link href="/creator" className="text-sm text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 transition-colors">成为创作者</Link></li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-gray-900">支持</h3>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">支持</h3>
             <ul className="mt-3 space-y-2">
-              <li><span className="text-sm text-gray-400">帮助中心（即将上线）</span></li>
-              <li><span className="text-sm text-gray-400">服务条款（即将上线）</span></li>
-              <li><span className="text-sm text-gray-400">隐私政策（即将上线）</span></li>
+              <li><span className="text-sm text-gray-400 dark:text-gray-600">帮助中心（即将上线）</span></li>
+              <li><span className="text-sm text-gray-400 dark:text-gray-600">服务条款（即将上线）</span></li>
+              <li><span className="text-sm text-gray-400 dark:text-gray-600">隐私政策（即将上线）</span></li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-gray-900">联系我们</h3>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">联系我们</h3>
             <ul className="mt-3 space-y-2">
-              <li className="text-sm text-gray-500">邮箱：support@aivideo.com</li>
-              <li className="text-sm text-gray-500">微信：AI视频工场</li>
+              <li className="text-sm text-gray-500 dark:text-gray-400">邮箱：support@aivideo.com</li>
+              <li className="text-sm text-gray-500 dark:text-gray-400">微信：AI视频工场</li>
             </ul>
           </div>
         </div>

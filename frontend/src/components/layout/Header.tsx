@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Menu, X, Video, User, LogOut, ShieldCheck, MessageSquare, BarChart3 } from 'lucide-react';
 import { useAuthStore } from '@/lib/store';
 import { NotificationBell } from '@/components/ui/NotificationBell';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
 const navLinks = [
   { href: '/works', label: '浏览作品' },
@@ -19,7 +20,7 @@ export function Header() {
   const isAdmin = user?.role === 'ADMIN';
 
   return (
-    <header className="sticky top-0 z-50 border-b border-primary-100/60 bg-white/70 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-primary-100/60 bg-white/70 backdrop-blur-xl dark:border-gray-800 dark:bg-gray-950/70">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
@@ -71,6 +72,7 @@ export function Header() {
         <div className="hidden items-center gap-3 md:flex">
           {isAuthenticated() ? (
             <div className="flex items-center gap-3">
+              <ThemeToggle />
               <Link href="/chat" className="p-1.5 text-gray-500 hover:text-primary-600 transition-colors">
                 <MessageSquare className="h-5 w-5" />
               </Link>
@@ -91,6 +93,7 @@ export function Header() {
             </div>
           ) : (
             <>
+              <ThemeToggle />
               <Link href="/login" className="btn-secondary text-sm">
                 登录
               </Link>
@@ -112,7 +115,7 @@ export function Header() {
 
       {/* Mobile Nav */}
       {mobileOpen && (
-        <div className="border-t border-gray-200 bg-white px-4 py-3 md:hidden">
+        <div className="border-t border-gray-200 bg-white px-4 py-3 dark:border-gray-800 dark:bg-gray-950 md:hidden">
           {navLinks.map((link) => (
             <Link
               key={link.href}
