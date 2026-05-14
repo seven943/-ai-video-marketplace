@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { Search, Users, Star, Filter, X } from 'lucide-react';
 import { creatorApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
-import { useDebounce } from '@/lib/hooks';
+import { useDebounce, useSearchShortcut } from '@/lib/hooks';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { CreatorCardSkeleton } from '@/components/ui/Skeleton';
 import { Highlight } from '@/components/ui/Highlight';
@@ -39,6 +39,8 @@ export default function CreatorsPage() {
   const [error, setError] = useState('');
   const [keyword, setKeyword] = useState('');
   const debouncedKeyword = useDebounce(keyword);
+  const searchRef = useRef<HTMLInputElement>(null);
+  useSearchShortcut(searchRef);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedTools, setSelectedTools] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState(0);
@@ -103,7 +105,8 @@ export default function CreatorsPage() {
             <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-primary-400" />
             <input
               type="text"
-              placeholder="搜索创作者..."
+              ref={searchRef}
+              placeholder="搜索创作者... (按 / 聚焦)"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               className="input-field pl-10"
@@ -262,15 +265,19 @@ export default function CreatorsPage() {
             </Link>
           ))}
         </div>
+      ) : debouncedKeyword || hasFilters ? (
+        <div className="mt-20 text-center">
+          <Users className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+          <p className="text-gray-500">未找到符合条件的创作者</p>
+          <p className="mt-1 text-sm text-gray-400">试试调整搜索词或筛选条件</p>
+          <button onClick={clearFilters} className="mt-3 btn-secondary text-sm">
+            清除所有条件
+          </button>
+        </div>
       ) : (
         <div className="mt-20 text-center">
           <Users className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-500">暂无符合条件的创作者</p>
-          {hasFilters && (
-            <button onClick={clearFilters} className="mt-2 text-primary-500 hover:underline text-sm">
-              清除筛选条件
-            </button>
-          )}
+          <p className="text-gray-500">暂无创作者</p>
         </div>
       )}
     </div>

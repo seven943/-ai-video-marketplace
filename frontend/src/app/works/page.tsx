@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { Search, Sparkles, Loader2, Plus } from 'lucide-react';
+import { Search, Sparkles, Plus } from 'lucide-react';
 import { WorkCard } from '@/components/ui/WorkCard';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
@@ -10,6 +10,7 @@ import { WorkCardSkeleton } from '@/components/ui/Skeleton';
 import { VIDEO_CATEGORY_LABELS, type VideoCategory, type Work } from '@/types';
 import { worksApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
+import { useSearchShortcut } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 
 const categories: (VideoCategory | 'all')[] = [
@@ -26,6 +27,8 @@ export default function WorksPage() {
   const isCreatorRole = user?.role === 'CREATOR' || user?.role === 'BOTH' || user?.role === 'ADMIN';
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const searchRef = useRef<HTMLInputElement>(null);
+  useSearchShortcut(searchRef);
   const [works, setWorks] = useState<Work[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -67,7 +70,7 @@ export default function WorksPage() {
         <div className="flex items-center gap-3">
           <div className="relative w-full sm:w-72">
             <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-primary-400" />
-            <input type="text" placeholder="搜索作品..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="input-field pl-10" />
+            <input ref={searchRef} type="text" placeholder="搜索作品... (按 / 聚焦)" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="input-field pl-10" />
           </div>
           {isCreatorRole && (
             <Link href="/works/create" className="btn-primary gap-2 whitespace-nowrap">
@@ -106,6 +109,16 @@ export default function WorksPage() {
             <WorkCard key={work.id} work={work} searchKeyword={searchQuery} />
           ))}
         </div>
+      ) : searchQuery ? (
+        <EmptyState
+          title="未找到相关作品"
+          description={`没有找到包含"${searchQuery}"的作品，试试其他关键词`}
+          action={
+            <button onClick={() => setSearchQuery('')} className="btn-secondary text-sm">
+              清除搜索
+            </button>
+          }
+        />
       ) : (
         <EmptyState title="暂无作品" description="该分类下暂时没有作品，换个分类看看吧" />
       )}

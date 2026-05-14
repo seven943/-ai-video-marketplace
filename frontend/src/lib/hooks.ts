@@ -48,3 +48,19 @@ export function useConfirmDialog() {
 
   return { ...state, confirm, cancel };
 }
+
+export function useSearchShortcut(inputRef: React.RefObject<HTMLInputElement | null>) {
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+      if (e.key === 'Escape') {
+        inputRef.current?.blur();
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [inputRef]);
+}

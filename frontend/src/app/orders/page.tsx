@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { Plus, Search, FileText, Loader2, SlidersHorizontal, X } from 'lucide-react';
+import { Plus, Search, FileText, SlidersHorizontal, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { OrderCard } from '@/components/ui/OrderCard';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -11,6 +11,7 @@ import { OrderCardSkeleton } from '@/components/ui/Skeleton';
 import { ORDER_STATUS_LABELS, VIDEO_CATEGORY_LABELS, type OrderStatus, type VideoCategory, type Order } from '@/types';
 import { orderApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
+import { useSearchShortcut } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 
 const statusFilters: (OrderStatus | 'all')[] = [
@@ -57,6 +58,8 @@ export default function OrdersPage() {
   const [acceptingId, setAcceptingId] = useState('');
   const [debouncedKeyword, setDebouncedKeyword] = useState('');
   const searchTimerRef = useRef<NodeJS.Timeout>();
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  useSearchShortcut(searchInputRef);
 
   const isCreatorRole = user?.role === 'CREATOR' || user?.role === 'BOTH' || user?.role === 'ADMIN';
 
@@ -160,8 +163,9 @@ export default function OrdersPage() {
             <div className="relative flex-1 sm:w-64">
               <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-primary-400" />
               <input
+                ref={searchInputRef}
                 type="text"
-                placeholder="搜索需求..."
+                placeholder="搜索需求... (按 / 聚焦)"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="input-field pl-10"
