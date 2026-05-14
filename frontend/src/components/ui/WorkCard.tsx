@@ -33,6 +33,7 @@ export function WorkCard({ work }: WorkCardProps) {
           <img
             src={work.coverUrl}
             alt={work.title}
+            loading="lazy"
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
         ) : (

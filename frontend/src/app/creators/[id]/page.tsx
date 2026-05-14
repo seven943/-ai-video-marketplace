@@ -247,7 +247,7 @@ export default function CreatorDetailPage() {
               <Link key={work.id} href={`/works/${work.id}`} className="card-hover group overflow-hidden">
                 <div className="aspect-video bg-gradient-to-br from-primary-100 to-accent-100 overflow-hidden">
                   {work.coverUrl ? (
-                    <img src={work.coverUrl} alt={work.title} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+                    <img src={work.coverUrl} alt={work.title} loading="lazy" className="h-full w-full object-cover transition-transform group-hover:scale-105" />
                   ) : (
                     <div className="flex h-full items-center justify-center">
                       <span className="text-4xl">🎬</span>

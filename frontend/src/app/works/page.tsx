@@ -6,6 +6,7 @@ import { Search, Sparkles, Loader2, Plus } from 'lucide-react';
 import { WorkCard } from '@/components/ui/WorkCard';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { WorkCardSkeleton } from '@/components/ui/Skeleton';
 import { VIDEO_CATEGORY_LABELS, type VideoCategory, type Work } from '@/types';
 import { worksApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
@@ -92,8 +93,10 @@ export default function WorksPage() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
+        <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <WorkCardSkeleton key={i} />
+          ))}
         </div>
       ) : error ? (
         <ErrorState message={error} onRetry={fetchWorks} />

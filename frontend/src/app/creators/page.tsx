@@ -6,6 +6,7 @@ import { Search, Users, Loader2, Star, Filter, X } from 'lucide-react';
 import { creatorApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { CreatorCardSkeleton } from '@/components/ui/Skeleton';
 
 const popularTags = ['商品展示', '品牌宣传', '短视频', '解说视频', '社交媒体', '教育培训', '娱乐创意'];
 const popularAiTools = ['Kling', 'Runway', 'Sora', 'Midjourney', 'ComfyUI', 'Flux', 'Pika', 'Stable Diffusion'];
@@ -191,8 +192,10 @@ export default function CreatorsPage() {
 
       {/* Creator List */}
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
+        <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <CreatorCardSkeleton key={i} />
+          ))}
         </div>
       ) : error ? (
         <ErrorState message={error} onRetry={fetchCreators} />

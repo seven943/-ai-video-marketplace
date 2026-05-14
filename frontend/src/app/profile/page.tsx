@@ -218,7 +218,7 @@ export default function ProfilePage() {
                     >
                       <div className="flex h-14 w-20 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-100 to-indigo-50 overflow-hidden shrink-0">
                         {work.coverUrl ? (
-                          <img src={work.coverUrl} alt="" className="h-full w-full object-cover" />
+                          <img src={work.coverUrl} alt="" loading="lazy" className="h-full w-full object-cover" />
                         ) : (
                           <Video className="h-5 w-5 text-indigo-300" />
                         )}

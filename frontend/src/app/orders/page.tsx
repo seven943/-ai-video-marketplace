@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { OrderCard } from '@/components/ui/OrderCard';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { OrderCardSkeleton } from '@/components/ui/Skeleton';
 import { ORDER_STATUS_LABELS, VIDEO_CATEGORY_LABELS, type OrderStatus, type VideoCategory, type Order } from '@/types';
 import { orderApi } from '@/lib/api';
 import { useAuthStore } from '@/lib/store';
@@ -266,8 +267,10 @@ export default function OrdersPage() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
+        <div className="mt-6 space-y-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <OrderCardSkeleton key={i} />
+          ))}
         </div>
       ) : error ? (
         <ErrorState message={error} onRetry={fetchOrders} />
