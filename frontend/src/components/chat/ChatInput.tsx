@@ -49,6 +49,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
       />
       <button
         onClick={handleSend}
+        aria-label="发送消息"
         disabled={!content.trim() || sending || disabled}
         className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-500 text-white transition-colors hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
       >

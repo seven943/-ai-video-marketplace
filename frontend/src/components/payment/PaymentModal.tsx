@@ -51,6 +51,7 @@ export function PaymentModal({ orderId, amount, isDeposit, onClose, onSuccess }:
         {/* 关闭按钮 */}
         <button
           onClick={onClose}
+          aria-label="关闭"
           className="absolute right-4 top-4 p-1 text-gray-400 hover:text-gray-600"
         >
           <X className="h-5 w-5" />

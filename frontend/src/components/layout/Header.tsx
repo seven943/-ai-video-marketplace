@@ -86,6 +86,7 @@ export function Header() {
               </Link>
               <button
                 onClick={logout}
+                aria-label="退出登录"
                 className="flex items-center gap-1 text-sm text-gray-500 hover:text-red-500"
               >
                 <LogOut className="h-4 w-4" />
@@ -107,6 +108,7 @@ export function Header() {
         {/* Mobile Menu Button */}
         <button
           className="md:hidden"
+          aria-label={mobileOpen ? '关闭菜单' : '打开菜单'}
           onClick={() => setMobileOpen(!mobileOpen)}
         >
           {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}

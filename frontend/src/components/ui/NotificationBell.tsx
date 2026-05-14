@@ -81,6 +81,7 @@ export function NotificationBell() {
     <div className="relative" ref={panelRef}>
       <button
         onClick={handleOpen}
+        aria-label={count > 0 ? `${count} 条未读通知` : '通知'}
         className="relative p-1.5 text-gray-500 hover:text-primary-600 transition-colors"
       >
         <Bell className="h-5 w-5" />
