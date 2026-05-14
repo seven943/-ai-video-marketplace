@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Loader2, CheckCircle, Smartphone, CreditCard } from 'lucide-react';
 import { payApi } from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -19,15 +19,19 @@ export function PaymentModal({ orderId, amount, isDeposit, onClose, onSuccess }:
   const [step, setStep] = useState<'select' | 'paying' | 'success'>('select');
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const handlePay = async () => {
     setLoading(true);
     try {
-      // 创建支付记录
       const payment = await payApi.create(orderId, method) as any;
-
-      // 模拟支付
       await payApi.simulatePay(payment.id);
-
       setStep('success');
       toast.success('支付成功！');
       setTimeout(() => {
@@ -42,13 +46,10 @@ export function PaymentModal({ orderId, amount, isDeposit, onClose, onSuccess }:
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* 遮罩 */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true" aria-label={isDeposit ? '支付定金' : '确认支付'}>
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
-      {/* 弹窗 */}
       <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
-        {/* 关闭按钮 */}
         <button
           onClick={onClose}
           aria-label="关闭"
@@ -62,7 +63,6 @@ export function PaymentModal({ orderId, amount, isDeposit, onClose, onSuccess }:
             <h2 className="text-xl font-bold text-gray-900">{isDeposit ? '支付定金' : '确认支付'}</h2>
             <p className="mt-1 text-sm text-gray-500">{isDeposit ? '支付报价10%的定金，资金将托管至订单完成' : '选择支付方式完成订单支付'}</p>
 
-            {/* 金额 */}
             <div className="mt-6 rounded-xl bg-primary-50 p-4 text-center">
               <p className="text-sm text-gray-500">{isDeposit ? '定金金额' : '支付金额'}</p>
               <p className="mt-1 text-3xl font-bold text-primary-600">
@@ -71,7 +71,6 @@ export function PaymentModal({ orderId, amount, isDeposit, onClose, onSuccess }:
               {isDeposit && <p className="mt-1 text-xs text-gray-400">报价的10%，剩余90%验收后结算</p>}
             </div>
 
-            {/* 支付方式 */}
             <div className="mt-6 space-y-3">
               <p className="text-sm font-medium text-gray-700">支付方式</p>
               <button
@@ -111,7 +110,6 @@ export function PaymentModal({ orderId, amount, isDeposit, onClose, onSuccess }:
               </button>
             </div>
 
-            {/* 确认按钮 */}
             <button
               onClick={handlePay}
               disabled={loading}
