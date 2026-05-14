@@ -9,6 +9,8 @@ import { useAuthStore } from '@/lib/store';
 import { userApi, orderApi, worksApi } from '@/lib/api';
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from '@/types';
 import toast from 'react-hot-toast';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { useConfirmDialog } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 
 type Tab = 'orders' | 'works' | 'settings';
@@ -18,6 +20,7 @@ export default function ProfilePage() {
   const { user, logout, isAuthenticated } = useAuthStore();
   const [activeTab, setActiveTab] = useState<Tab>('orders');
   const [profile, setProfile] = useState<any>(null);
+  const confirmDialog = useConfirmDialog();
   const [orders, setOrders] = useState<any[]>([]);
   const [works, setWorks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -153,7 +156,15 @@ export default function ProfilePage() {
               </button>
             ))}
             <button
-              onClick={() => { logout(); toast.success('已退出登录'); router.push('/'); }}
+              onClick={async () => {
+                const confirmed = await confirmDialog.confirm({
+                  title: '退出登录',
+                  message: '确定要退出当前账号吗？',
+                  confirmText: '退出',
+                  danger: true,
+                });
+                if (confirmed) { logout(); toast.success('已退出登录'); router.push('/'); }
+              }}
               className="flex w-full items-center gap-3 px-4 py-3.5 text-sm font-medium text-red-500 hover:bg-red-50 border-l-2 border-transparent transition-all"
             >
               <LogOut className="h-4 w-4" />退出登录
@@ -285,6 +296,16 @@ export default function ProfilePage() {
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        confirmText={confirmDialog.confirmText}
+        danger={confirmDialog.danger}
+        onConfirm={confirmDialog.onConfirm}
+        onCancel={confirmDialog.cancel}
+      />
     </div>
   );
 }

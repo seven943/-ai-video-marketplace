@@ -5,9 +5,11 @@ import { Eye, Heart, Play } from 'lucide-react';
 import type { Work } from '@/types';
 import { VIDEO_CATEGORY_LABELS } from '@/types';
 import { Badge } from './Badge';
+import { Highlight } from './Highlight';
 
 interface WorkCardProps {
   work: Work;
+  searchKeyword?: string;
 }
 
 const gradients = [
@@ -24,7 +26,7 @@ function getGradient(id: string) {
   return gradients[idx];
 }
 
-export function WorkCard({ work }: WorkCardProps) {
+export function WorkCard({ work, searchKeyword }: WorkCardProps) {
   return (
     <Link href={`/works/${work.id}`} className="group card-hover overflow-hidden">
       {/* Cover */}
@@ -58,7 +60,7 @@ export function WorkCard({ work }: WorkCardProps) {
       {/* Info */}
       <div className="p-4">
         <h3 className="line-clamp-1 text-sm font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
-          {work.title}
+          <Highlight text={work.title} keyword={searchKeyword || ''} />
         </h3>
 
         {/* Creator */}

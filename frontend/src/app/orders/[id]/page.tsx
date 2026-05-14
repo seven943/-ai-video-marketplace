@@ -12,6 +12,8 @@ import { ReviewForm } from '@/components/ui/ReviewForm';
 import { ReviewList } from '@/components/ui/ReviewList';
 import { RecommendedCreators } from '@/components/ui/RecommendedCreators';
 import { PaymentModal } from '@/components/payment/PaymentModal';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { useConfirmDialog } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 
 const statusTimeline: { status: string; label: string; icon: typeof CheckCircle2 }[] = [
@@ -37,6 +39,7 @@ export default function OrderDetailPage() {
   const [showQuoteForm, setShowQuoteForm] = useState(false);
   const [quotedPrice, setQuotedPrice] = useState('');
   const [quotedDeadline, setQuotedDeadline] = useState('');
+  const confirmDialog = useConfirmDialog();
 
   const fetchOrder = useCallback(async () => {
     try {
@@ -291,7 +294,15 @@ export default function OrderDetailPage() {
 
                 {/* 取消 */}
                 <button
-                  onClick={() => handleAction('cancel', () => orderApi.cancel(order.id))}
+                  onClick={async () => {
+                    const confirmed = await confirmDialog.confirm({
+                      title: '取消订单',
+                      message: '确定要取消此订单吗？取消后无法恢复。',
+                      confirmText: '确认取消',
+                      danger: true,
+                    });
+                    if (confirmed) handleAction('cancel', () => orderApi.cancel(order.id));
+                  }}
                   disabled={!!actionLoading}
                   className="btn-secondary text-red-600 hover:text-red-700"
                 >
@@ -484,6 +495,16 @@ export default function OrderDetailPage() {
           onSuccess={fetchOrder}
         />
       )}
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        confirmText={confirmDialog.confirmText}
+        danger={confirmDialog.danger}
+        onConfirm={confirmDialog.onConfirm}
+        onCancel={confirmDialog.cancel}
+      />
     </div>
   );
 }

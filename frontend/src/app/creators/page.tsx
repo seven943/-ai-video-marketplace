@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Search, Users, Loader2, Star, Filter, X } from 'lucide-react';
+import { Search, Users, Star, Filter, X } from 'lucide-react';
 import { creatorApi } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import { useDebounce } from '@/lib/hooks';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { CreatorCardSkeleton } from '@/components/ui/Skeleton';
+import { Highlight } from '@/components/ui/Highlight';
 
 const popularTags = ['商品展示', '品牌宣传', '短视频', '解说视频', '社交媒体', '教育培训', '娱乐创意'];
 const popularAiTools = ['Kling', 'Runway', 'Sora', 'Midjourney', 'ComfyUI', 'Flux', 'Pika', 'Stable Diffusion'];
@@ -36,6 +38,7 @@ export default function CreatorsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [keyword, setKeyword] = useState('');
+  const debouncedKeyword = useDebounce(keyword);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedTools, setSelectedTools] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState(0);
@@ -46,7 +49,7 @@ export default function CreatorsPage() {
     setError('');
     try {
       const params: any = { page: 1, pageSize: 50 };
-      if (keyword) params.keyword = keyword;
+      if (debouncedKeyword) params.keyword = debouncedKeyword;
       if (selectedTags.length) params.tags = selectedTags.join(',');
       if (selectedTools.length) params.aiTools = selectedTools.join(',');
       if (priceRange > 0) {
@@ -61,7 +64,7 @@ export default function CreatorsPage() {
     } finally {
       setLoading(false);
     }
-  }, [keyword, selectedTags, selectedTools, priceRange]);
+  }, [debouncedKeyword, selectedTags, selectedTools, priceRange]);
 
   useEffect(() => {
     fetchCreators();
@@ -213,7 +216,7 @@ export default function CreatorsPage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3 className="text-base font-semibold text-gray-900 group-hover:text-primary-600 transition-colors truncate">
-                    {creator.user.nickname}
+                    <Highlight text={creator.user.nickname} keyword={debouncedKeyword} />
                   </h3>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="flex items-center gap-0.5">
@@ -234,7 +237,7 @@ export default function CreatorsPage() {
                 </div>
               </div>
 
-              <p className="mt-3 text-sm text-gray-500 line-clamp-2 leading-relaxed">{creator.bio}</p>
+              <p className="mt-3 text-sm text-gray-500 line-clamp-2 leading-relaxed"><Highlight text={creator.bio} keyword={debouncedKeyword} /></p>
 
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {creator.tags.slice(0, 3).map((tag) => (

@@ -103,7 +103,7 @@ export default function WorksPage() {
       ) : filteredWorks.length > 0 ? (
         <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {filteredWorks.map((work) => (
-            <WorkCard key={work.id} work={work} />
+            <WorkCard key={work.id} work={work} searchKeyword={searchQuery} />
           ))}
         </div>
       ) : (
